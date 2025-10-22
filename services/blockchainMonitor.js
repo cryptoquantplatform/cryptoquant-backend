@@ -254,9 +254,22 @@ async function processIncomingTransaction(userId, address, crypto, txHash, amoun
     }
 }
 
-// Get crypto price in USD
+// Get crypto price in USD (with fallback prices and retry logic)
 async function getCryptoPriceUSD(crypto) {
+    // Realistic fallback prices (updated 2025)
+    const FALLBACK_PRICES = {
+        'ETH': 2500,
+        'BTC': 65000,
+        'SOL': 140,
+        'USDT': 1
+    };
+    
     try {
+        // USDT is always $1
+        if (crypto === 'USDT') {
+            return 1;
+        }
+        
         const coinIds = {
             'ETH': 'ethereum',
             'BTC': 'bitcoin',
@@ -267,28 +280,54 @@ async function getCryptoPriceUSD(crypto) {
         const coinId = coinIds[crypto];
         if (!coinId) {
             console.error(`Unknown crypto: ${crypto}`);
-            return 1; // Fallback
+            return FALLBACK_PRICES[crypto] || 1;
         }
         
-        // USDT is always $1
-        if (crypto === 'USDT') {
-            return 1;
+        // Try CoinGecko first
+        try {
+            const response = await axios.get(
+                `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd`,
+                { timeout: 5000 }
+            );
+            const price = response.data[coinId]?.usd;
+            
+            if (price && price > 0) {
+                console.log(`💵 ${crypto} price: $${price} (CoinGecko)`);
+                return price;
+            }
+        } catch (coinGeckoError) {
+            console.warn(`⚠️ CoinGecko API failed: ${coinGeckoError.message}`);
         }
         
-        const response = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd`);
-        const price = response.data[coinId]?.usd;
-        
-        if (!price) {
-            console.error(`Failed to get price for ${crypto}`);
-            return 1; // Fallback
+        // Fallback to CoinCap API
+        try {
+            const coinCapIds = {
+                'ETH': 'ethereum',
+                'BTC': 'bitcoin',
+                'SOL': 'solana'
+            };
+            
+            const response = await axios.get(
+                `https://api.coincap.io/v2/assets/${coinCapIds[crypto]}`,
+                { timeout: 5000 }
+            );
+            const price = parseFloat(response.data?.data?.priceUsd);
+            
+            if (price && price > 0) {
+                console.log(`💵 ${crypto} price: $${price} (CoinCap)`);
+                return price;
+            }
+        } catch (coinCapError) {
+            console.warn(`⚠️ CoinCap API failed: ${coinCapError.message}`);
         }
         
-        console.log(`💵 ${crypto} price: $${price}`);
-        return price;
+        // Use realistic fallback price
+        console.warn(`⚠️ Using fallback price for ${crypto}: $${FALLBACK_PRICES[crypto]}`);
+        return FALLBACK_PRICES[crypto] || 1;
         
     } catch (error) {
         console.error(`Error getting ${crypto} price:`, error.message);
-        return 1; // Fallback
+        return FALLBACK_PRICES[crypto] || 1;
     }
 }
 
@@ -299,12 +338,19 @@ async function creditUserBalance(client, userId, amount, crypto, txHash) {
         const priceUSD = await getCryptoPriceUSD(crypto);
         const usdValue = parseFloat(amount) * priceUSD;
         
-        console.log(`💰 Converting ${amount} ${crypto} × $${priceUSD} = $${usdValue.toFixed(2)} USD`);
+        console.log(`💰 Converting ${amount} ${crypto} × $${priceUSD} = $${usdValue.toFixed(4)} USD`);
+        
+        // Ensure minimum credit of $0.01 if deposit exists
+        const creditAmount = usdValue < 0.01 && usdValue > 0 ? 0.01 : usdValue;
+        
+        if (creditAmount !== usdValue) {
+            console.log(`⚠️ Adjusted credit from $${usdValue.toFixed(4)} to $${creditAmount.toFixed(2)} (minimum $0.01)`);
+        }
         
         // Update user balance with USD value
         await client.query(
             'UPDATE users SET balance = balance + $1 WHERE id = $2',
-            [usdValue, userId]
+            [creditAmount, userId]
         );
 
         // Mark transaction as credited

@@ -67,10 +67,10 @@ exports.getWalletsSummary = async (req, res) => {
             success: true,
             cryptoBalances: cryptoBalances.rows,
             totalWithdrawable: totalWithdrawable.rows[0].total || 0,
-            usersWithDeposits: usersWithDeposits.rows[0].count || 0,
+            usersWithDepositsCount: usersWithDeposits.rows[0].count || 0,
             pendingDeposits: pendingDeposits.rows[0].count || 0,
             approvedDeposits: approvedDeposits.rows[0].count || 0,
-            usersWithDeposits: usersWithDepositsList.rows
+            usersWithDepositsList: usersWithDepositsList.rows
         });
 
     } catch (error) {
