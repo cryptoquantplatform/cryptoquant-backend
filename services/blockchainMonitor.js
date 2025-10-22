@@ -450,9 +450,17 @@ async function getUplineUsers(userId, maxLevels = 10) {
     return upline;
 }
 
-// Monitor a single address
+// Monitor a single address with retry logic
 async function monitorAddress(userId, address, crypto) {
     try {
+        // Check if we should skip this check due to recent rate limit errors
+        if (global.rateLimitBackoff && global.rateLimitBackoff[crypto]) {
+            const backoffUntil = global.rateLimitBackoff[crypto];
+            if (Date.now() < backoffUntil) {
+                console.log(`⏸️ Skipping ${crypto} checks (rate limit backoff until ${new Date(backoffUntil).toLocaleTimeString()})`);
+                return;
+            }
+        }
         let transactions = [];
 
         // Get transactions based on crypto type
@@ -589,10 +597,20 @@ async function monitorAddress(userId, address, crypto) {
 
     } catch (error) {
         console.error(`Error monitoring address ${address} (${crypto}):`, error.message);
+        
+        // If rate limit error (429), set backoff for this crypto type
+        if (error.message && error.message.includes('429')) {
+            if (!global.rateLimitBackoff) {
+                global.rateLimitBackoff = {};
+            }
+            // Backoff for 2 minutes
+            global.rateLimitBackoff[crypto] = Date.now() + (2 * 60 * 1000);
+            console.log(`⏸️ Rate limit hit for ${crypto}. Backing off for 2 minutes.`);
+        }
     }
 }
 
-// Monitor all user addresses
+// Monitor all user addresses with better rate limiting
 async function monitorAllAddresses() {
     try {
         const result = await pool.query(
@@ -600,15 +618,53 @@ async function monitorAllAddresses() {
              FROM user_deposit_addresses 
              WHERE last_checked IS NULL OR last_checked < NOW() - INTERVAL '5 minutes'
              ORDER BY last_checked ASC NULLS FIRST
-             LIMIT 50`
+             LIMIT 20`  // Reduced from 50 to avoid rate limits
         );
 
         console.log(`🔍 Monitoring ${result.rows.length} addresses...`);
 
+        // Group addresses by crypto type to optimize API calls
+        const addressesByCrypto = {
+            ETH: [],
+            USDT: [],
+            BTC: [],
+            SOL: []
+        };
+
         for (const row of result.rows) {
-            await monitorAddress(row.user_id, row.address, row.crypto);
-            // Small delay to avoid rate limiting
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            if (addressesByCrypto[row.crypto]) {
+                addressesByCrypto[row.crypto].push(row);
+            }
+        }
+
+        // Monitor each crypto type with appropriate delays
+        for (const crypto in addressesByCrypto) {
+            const addresses = addressesByCrypto[crypto];
+            
+            if (addresses.length === 0) continue;
+            
+            console.log(`📊 Checking ${addresses.length} ${crypto} addresses...`);
+            
+            for (const row of addresses) {
+                try {
+                    await monitorAddress(row.user_id, row.address, row.crypto);
+                } catch (error) {
+                    console.error(`Error monitoring ${crypto} address ${row.address}:`, error.message);
+                }
+                
+                // Different delays based on crypto (avoid rate limits)
+                const delays = {
+                    ETH: 2000,   // 2 seconds (Etherscan)
+                    USDT: 2000,  // 2 seconds (Etherscan)
+                    BTC: 3000,   // 3 seconds (BlockCypher)
+                    SOL: 1500    // 1.5 seconds (Solana RPC)
+                };
+                
+                await new Promise(resolve => setTimeout(resolve, delays[crypto] || 2000));
+            }
+            
+            // Extra delay between crypto types
+            await new Promise(resolve => setTimeout(resolve, 2000));
         }
 
     } catch (error) {
