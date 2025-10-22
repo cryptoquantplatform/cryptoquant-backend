@@ -2,6 +2,7 @@ const axios = require('axios');
 const { ethers } = require('ethers');
 const pool = require('../config/database');
 const { HttpsProxyAgent } = require('https-proxy-agent');
+const freeProxyManager = require('./freeProxyManager');
 
 // API Keys (should be in .env in production)
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || 'YourEtherscanAPIKey';
@@ -19,7 +20,18 @@ const ethProvider = new ethers.JsonRpcProvider(ETH_RPC_URL);
 const PROXY_LIST = process.env.PROXY_LIST ? process.env.PROXY_LIST.split(',').map(p => p.trim()) : [];
 let currentProxyIndex = 0;
 
-// Get next proxy in rotation
+// Check if we should use free proxies
+const USE_FREE_PROXIES = process.env.USE_FREE_PROXIES === 'true' || PROXY_LIST.length === 0;
+
+if (USE_FREE_PROXIES && PROXY_LIST.length === 0) {
+    console.log('🆓 Free proxy mode enabled - will automatically fetch and rotate free proxies');
+} else if (PROXY_LIST.length > 0) {
+    console.log(`🔐 Using ${PROXY_LIST.length} configured proxies from PROXY_LIST`);
+} else {
+    console.log('⚠️ No proxies configured - using direct connection (may hit rate limits)');
+}
+
+// Get next proxy in rotation (paid proxies)
 function getNextProxy() {
     if (PROXY_LIST.length === 0) {
         return null; // No proxies configured
@@ -33,11 +45,23 @@ function getNextProxy() {
 // Create axios config with proxy
 function getAxiosConfig(timeout = 10000) {
     const config = { timeout };
-    const proxy = getNextProxy();
-    if (proxy) {
-        config.httpsAgent = new HttpsProxyAgent(proxy);
-        config.httpAgent = new HttpsProxyAgent(proxy);
+    
+    // Try paid proxies first
+    if (PROXY_LIST.length > 0) {
+        const proxy = getNextProxy();
+        if (proxy) {
+            config.httpsAgent = new HttpsProxyAgent(proxy);
+            config.httpAgent = new HttpsProxyAgent(proxy);
+        }
+        return config;
     }
+    
+    // Use free proxies if enabled
+    if (USE_FREE_PROXIES) {
+        return freeProxyManager.getAxiosConfig(timeout);
+    }
+    
+    // No proxies at all
     return config;
 }
 
