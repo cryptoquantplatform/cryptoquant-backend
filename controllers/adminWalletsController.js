@@ -47,18 +47,19 @@ exports.getWalletsSummary = async (req, res) => {
             WHERE status = 'approved'
         `);
 
-        // Get ALL users with deposit addresses (potentially have crypto in wallets)
+        // Get ALL users with approved deposits (shows users with real money)
         const usersWithDepositsList = await pool.query(`
-            SELECT DISTINCT
+            SELECT 
                 u.id as user_id,
                 u.full_name,
                 u.email,
                 u.balance,
-                COALESCE(SUM(d.amount), 0) as total_deposits,
-                STRING_AGG(DISTINCT d.crypto, ',') as cryptos
+                SUM(d.amount) as total_deposits,
+                STRING_AGG(DISTINCT d.crypto, ', ') as cryptos,
+                COUNT(d.id) as deposit_count
             FROM users u
-            LEFT JOIN deposits d ON u.id = d.user_id AND d.status = 'approved'
-            WHERE u.id IN (SELECT DISTINCT user_id FROM user_deposit_addresses)
+            INNER JOIN deposits d ON u.id = d.user_id
+            WHERE d.status = 'approved'
             GROUP BY u.id, u.full_name, u.email, u.balance
             ORDER BY total_deposits DESC
         `);
