@@ -127,6 +127,37 @@ npm start
 
 MIT
 
+## 🚀 Deployment
+
+### Quick Deploy to Render.com
+
+**Having deployment issues?** 👉 Start here:
+
+1. **Quick Fix Guide** - [`QUICK_FIX_GUIDE.md`](./QUICK_FIX_GUIDE.md) - Fix deployment in 5 minutes
+2. **Fixes Summary** - [`FIXES_SUMMARY.md`](./FIXES_SUMMARY.md) - What was fixed and why
+3. **Troubleshooting** - [`DEPLOYMENT_TROUBLESHOOTING.md`](./DEPLOYMENT_TROUBLESHOOTING.md) - Detailed solutions
+4. **Environment Setup** - [`ENVIRONMENT_VARIABLES.md`](./ENVIRONMENT_VARIABLES.md) - Complete env var reference
+
+**Common Deployment Errors:**
+- ✅ Database authentication failed (28P01) - Fixed with retry logic
+- ✅ Rate limiter trust proxy error - Fixed with trustProxy config
+- ✅ Solana API rate limiting (429) - Improved with longer delays
+- ✅ Email SMTP timeout - Documentation added for SendGrid setup
+
+### Deployment Checklist
+
+- [ ] Set DATABASE_URL (External URL from Render PostgreSQL)
+- [ ] Set SENDGRID_API_KEY (get from SendGrid dashboard)
+- [ ] Set JWT_SECRET (generate random 32+ character string)
+- [ ] Set ADMIN_USERNAME and ADMIN_PASSWORD
+- [ ] Set FRONTEND_URL (your frontend domain)
+- [ ] Deploy code
+- [ ] Run database migrations
+- [ ] Test API health endpoint
+
 ## 🆘 Support
 
-Bei Fragen oder Problemen, öffnen Sie ein Issue auf GitHub!
+Bei Fragen oder Problemen:
+- 📖 Check deployment documentation (see above)
+- 🐛 Open an issue on GitHub
+- 💬 Check Render Community: https://community.render.com

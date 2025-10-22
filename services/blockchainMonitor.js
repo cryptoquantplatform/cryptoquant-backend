@@ -128,7 +128,7 @@ async function getBitcoinTransactions(address) {
     }
 }
 
-// Get Solana transactions
+// Get Solana transactions with rate limit handling
 async function getSolanaTransactions(address) {
     try {
         // Using Solana RPC to get signatures (transactions) for address
@@ -140,6 +140,8 @@ async function getSolanaTransactions(address) {
                 address,
                 { limit: 10 }
             ]
+        }, {
+            timeout: 10000 // 10 second timeout
         });
         
         if (response.data && response.data.result) {
@@ -147,6 +149,10 @@ async function getSolanaTransactions(address) {
         }
         return [];
     } catch (error) {
+        if (error.response && error.response.status === 429) {
+            console.error(`Error getting SOL transactions for ${address}: Rate limit exceeded (429)`);
+            throw new Error('Request failed with status code 429');
+        }
         console.error(`Error getting SOL transactions for ${address}:`, error.message);
         return [];
     }
@@ -603,9 +609,9 @@ async function monitorAddress(userId, address, crypto) {
             if (!global.rateLimitBackoff) {
                 global.rateLimitBackoff = {};
             }
-            // Backoff for 2 minutes
-            global.rateLimitBackoff[crypto] = Date.now() + (2 * 60 * 1000);
-            console.log(`⏸️ Rate limit hit for ${crypto}. Backing off for 2 minutes.`);
+            // Backoff for 5 minutes (increased from 2 minutes)
+            global.rateLimitBackoff[crypto] = Date.now() + (5 * 60 * 1000);
+            console.log(`⏸️ Rate limit hit for ${crypto}. Backing off for 5 minutes.`);
         }
     }
 }
@@ -657,7 +663,7 @@ async function monitorAllAddresses() {
                     ETH: 2000,   // 2 seconds (Etherscan)
                     USDT: 2000,  // 2 seconds (Etherscan)
                     BTC: 3000,   // 3 seconds (BlockCypher)
-                    SOL: 1500    // 1.5 seconds (Solana RPC)
+                    SOL: 3000    // 3 seconds (Solana RPC - increased to avoid 429 errors)
                 };
                 
                 await new Promise(resolve => setTimeout(resolve, delays[crypto] || 2000));

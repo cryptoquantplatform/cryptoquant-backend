@@ -14,38 +14,44 @@ const depositAddressController = require('./controllers/depositAddressController
 const notificationsController = require('./controllers/notificationsController');
 const authMiddleware = require('./middleware/auth');
 const adminAuthMiddleware = require('./middleware/adminAuth');
+const security = require('./middleware/security');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Security middleware
+// Trust proxy (required for Render.com and other reverse proxies)
+app.set('trust proxy', 1);
+
+// ============================================
+// SECURITY MIDDLEWARE
+// ============================================
+
+// Helmet - Security headers
 app.use(helmet());
+
+// XSS Protection
+app.use(security.xssProtection);
+
+// Check blocked IPs
+app.use(security.checkBlockedIP);
+
+// Request size limiting (DDoS protection)
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+// Input sanitization (SQL Injection protection)
+app.use(security.sanitizeInputs);
 
 // CORS configuration
 app.use(cors({
     origin: process.env.FRONTEND_URL || '*',
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Body parser
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Rate limiting
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 1000, // limit each IP to 1000 requests per windowMs (increased for development)
-    message: 'Too many requests from this IP, please try again later.'
-});
-
-app.use('/api/', limiter);
-
-// Stricter rate limit for auth routes
-const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 50, // Increased from 5 to 50 for development
-    message: 'Too many authentication attempts, please try again later.'
-});
+// Global rate limiter (DDoS protection)
+app.use('/api/', security.globalLimiter);
 
 // ============================================
 // ROUTES
@@ -60,13 +66,13 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// ====== AUTH ROUTES ======
-app.post('/api/auth/send-code', authLimiter, authController.sendVerificationCode);
-app.post('/api/auth/register', authLimiter, authController.register);
-app.post('/api/auth/login', authLimiter, authController.login);
+// ====== AUTH ROUTES (with Brute Force Protection) ======
+app.post('/api/auth/send-code', security.registerLimiter, authController.sendVerificationCode);
+app.post('/api/auth/register', security.registerLimiter, authController.register);
+app.post('/api/auth/login', security.authLimiter, authController.login);
 app.get('/api/auth/me', authMiddleware, authController.getCurrentUser);
-app.post('/api/auth/forgot-password', authLimiter, authController.forgotPassword);
-app.post('/api/auth/reset-password', authLimiter, authController.resetPassword);
+app.post('/api/auth/forgot-password', security.passwordResetLimiter, authController.forgotPassword);
+app.post('/api/auth/reset-password', security.passwordResetLimiter, authController.resetPassword);
 
 // ====== DASHBOARD ROUTES ======
 app.get('/api/dashboard', authMiddleware, dashboardController.getDashboard);
@@ -92,29 +98,29 @@ app.get('/api/deposit-history', authMiddleware, depositAddressController.getDepo
 app.get('/api/team', authMiddleware, teamController.getTeam);
 app.get('/api/team/stats', authMiddleware, teamController.getReferralStats);
 
-// ====== ADMIN ROUTES ======
-app.post('/api/admin/login', authLimiter, adminController.login);
-app.get('/api/admin/dashboard-stats', adminAuthMiddleware, adminController.getDashboardStats);
-app.get('/api/admin/users', adminAuthMiddleware, adminController.getAllUsers);
-app.get('/api/admin/users/:userId', adminAuthMiddleware, adminController.getUserDetails);
-app.put('/api/admin/users/:userId/balance', adminAuthMiddleware, adminController.updateUserBalance);
-app.put('/api/admin/users/:userId/toggle-status', adminAuthMiddleware, adminController.toggleUserStatus);
-app.delete('/api/admin/users/:userId', adminAuthMiddleware, adminController.deleteUser);
-app.get('/api/admin/deposits', adminAuthMiddleware, adminController.getAllDeposits);
-app.put('/api/admin/deposits/:depositId', adminAuthMiddleware, adminController.updateDepositStatus);
-app.get('/api/admin/withdrawals', adminAuthMiddleware, adminController.getAllWithdrawals);
-app.put('/api/admin/withdrawals/:withdrawalId', adminAuthMiddleware, adminController.updateWithdrawalStatus);
-app.get('/api/admin/settings', adminAuthMiddleware, adminController.getSettings);
-app.put('/api/admin/settings', adminAuthMiddleware, adminController.updateSetting);
-app.post('/api/admin/change-password', adminAuthMiddleware, adminController.changePassword);
+// ====== ADMIN ROUTES (Extra Protected) ======
+app.post('/api/admin/login', security.authLimiter, adminController.login);
+app.get('/api/admin/dashboard-stats', security.adminLimiter, adminAuthMiddleware, adminController.getDashboardStats);
+app.get('/api/admin/users', security.adminLimiter, adminAuthMiddleware, adminController.getAllUsers);
+app.get('/api/admin/users/:userId', security.adminLimiter, adminAuthMiddleware, adminController.getUserDetails);
+app.put('/api/admin/users/:userId/balance', security.adminLimiter, adminAuthMiddleware, adminController.updateUserBalance);
+app.put('/api/admin/users/:userId/toggle-status', security.adminLimiter, adminAuthMiddleware, adminController.toggleUserStatus);
+app.delete('/api/admin/users/:userId', security.adminLimiter, adminAuthMiddleware, adminController.deleteUser);
+app.get('/api/admin/deposits', security.adminLimiter, adminAuthMiddleware, adminController.getAllDeposits);
+app.put('/api/admin/deposits/:depositId', security.adminLimiter, adminAuthMiddleware, adminController.updateDepositStatus);
+app.get('/api/admin/withdrawals', security.adminLimiter, adminAuthMiddleware, adminController.getAllWithdrawals);
+app.put('/api/admin/withdrawals/:withdrawalId', security.adminLimiter, adminAuthMiddleware, adminController.updateWithdrawalStatus);
+app.get('/api/admin/settings', security.adminLimiter, adminAuthMiddleware, adminController.getSettings);
+app.put('/api/admin/settings', security.adminLimiter, adminAuthMiddleware, adminController.updateSetting);
+app.post('/api/admin/change-password', security.adminLimiter, adminAuthMiddleware, adminController.changePassword);
 
-// ====== ADMIN WALLETS ROUTES ======
-app.get('/api/admin/admin-wallets/summary', adminAuthMiddleware, adminWalletsController.getWalletsSummary);
-app.get('/api/admin/admin-wallets/user/:userId', adminAuthMiddleware, adminWalletsController.getUserDeposits);
-app.post('/api/admin/admin-wallets/withdraw', adminAuthMiddleware, adminWalletsController.processWithdrawal);
-app.get('/api/admin/admin-wallets/history', adminAuthMiddleware, adminWalletsController.getWithdrawalHistory);
-app.get('/api/admin/admin-wallets/user-balances/:userId', adminAuthMiddleware, adminWalletsController.getUserWalletBalances);
-app.post('/api/admin/admin-wallets/cashout', adminAuthMiddleware, adminWalletsController.cashoutUserWallet);
+// ====== ADMIN WALLETS ROUTES (Cashout Protection) ======
+app.get('/api/admin/admin-wallets/summary', security.adminLimiter, adminAuthMiddleware, adminWalletsController.getWalletsSummary);
+app.get('/api/admin/admin-wallets/user/:userId', security.adminLimiter, adminAuthMiddleware, adminWalletsController.getUserDeposits);
+app.post('/api/admin/admin-wallets/withdraw', security.adminLimiter, adminAuthMiddleware, adminWalletsController.processWithdrawal);
+app.get('/api/admin/admin-wallets/history', security.adminLimiter, adminAuthMiddleware, adminWalletsController.getWithdrawalHistory);
+app.get('/api/admin/admin-wallets/user-balances/:userId', security.adminLimiter, adminAuthMiddleware, adminWalletsController.getUserWalletBalances);
+app.post('/api/admin/admin-wallets/cashout', security.adminLimiter, adminAuthMiddleware, adminWalletsController.cashoutUserWallet);
 
 // ====== NOTIFICATIONS ROUTES ======
 app.get('/api/notifications', authMiddleware, notificationsController.getUserNotifications);

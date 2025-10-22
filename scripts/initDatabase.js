@@ -225,6 +225,21 @@ const createTables = async () => {
         `);
         console.log('✅ Password reset codes table created');
 
+        // Notifications table
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS notifications (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                type VARCHAR(50) NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                message TEXT NOT NULL,
+                data JSONB,
+                read BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log('✅ Notifications table created');
+
         // System settings table
         await client.query(`
             CREATE TABLE IF NOT EXISTS system_settings (

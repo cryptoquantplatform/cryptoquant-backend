@@ -27,3 +27,4 @@ async function createNotificationsTable() {
 
 createNotificationsTable();
 
+
