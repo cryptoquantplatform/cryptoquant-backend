@@ -12,6 +12,15 @@ const BLOCKCYPHER_TOKEN = process.env.BLOCKCYPHER_TOKEN || ''; // For Bitcoin
 const ETH_RPC_URL = process.env.ETH_RPC_URL || 'https://eth.llamarpc.com';
 const ethProvider = new ethers.JsonRpcProvider(ETH_RPC_URL);
 
+// Solana RPC Endpoints (multiple fallbacks for reliability)
+const SOLANA_RPC_ENDPOINTS = [
+    'https://api.mainnet-beta.solana.com',
+    'https://solana.public-rpc.com',
+    'https://rpc.ankr.com/solana',
+    'https://solana-api.projectserum.com'
+];
+let currentSolanaRpcIndex = 0;
+
 // ==========================================
 // PROXY ROTATION SYSTEM
 // ==========================================
@@ -30,7 +39,7 @@ const CORS_PROXIES = [
 ];
 
 let currentCorsProxyIndex = 0;
-const USE_CORS_PROXY = process.env.USE_CORS_PROXY !== 'false'; // Enabled by default
+const USE_CORS_PROXY = process.env.USE_CORS_PROXY === 'true'; // Disabled by default (backend doesn't need CORS proxy)
 
 // Check if we should use free proxies
 const USE_FREE_PROXIES = process.env.USE_FREE_PROXIES === 'true' && !USE_CORS_PROXY;
@@ -60,6 +69,21 @@ function switchToNextCorsProxy() {
     console.log(`⚠️ CORS Proxy failed: ${previousProxy}`);
     console.log(`🔄 Switching to next proxy: ${nextProxy}`);
     return nextProxy;
+}
+
+// Get current Solana RPC endpoint
+function getCurrentSolanaRpc() {
+    return SOLANA_RPC_ENDPOINTS[currentSolanaRpcIndex];
+}
+
+// Switch to next Solana RPC endpoint on failure
+function switchToNextSolanaRpc() {
+    const previousRpc = SOLANA_RPC_ENDPOINTS[currentSolanaRpcIndex];
+    currentSolanaRpcIndex = (currentSolanaRpcIndex + 1) % SOLANA_RPC_ENDPOINTS.length;
+    const nextRpc = SOLANA_RPC_ENDPOINTS[currentSolanaRpcIndex];
+    console.log(`⚠️ Solana RPC failed: ${previousRpc}`);
+    console.log(`🔄 Switching to next Solana RPC: ${nextRpc}`);
+    return nextRpc;
 }
 
 // Wrap URL with CORS proxy if enabled
@@ -185,16 +209,16 @@ async function checkBitcoinBalance(address) {
     return '0';
 }
 
-// Check Solana balance with automatic fallback
+// Check Solana balance with automatic RPC fallback
 async function checkSolanaBalance(address) {
     let attempts = 0;
-    const maxAttempts = USE_CORS_PROXY ? CORS_PROXIES.length : 1;
+    const maxAttempts = SOLANA_RPC_ENDPOINTS.length;
     
     while (attempts < maxAttempts) {
         try {
-            // Using public Solana RPC endpoint with CORS proxy
-            const url = wrapWithCorsProxy('https://api.mainnet-beta.solana.com');
-            const response = await axios.post(url, {
+            // Use current Solana RPC endpoint
+            const rpcUrl = getCurrentSolanaRpc();
+            const response = await axios.post(rpcUrl, {
                 jsonrpc: '2.0',
                 id: 1,
                 method: 'getBalance',
@@ -209,10 +233,11 @@ async function checkSolanaBalance(address) {
         } catch (error) {
             attempts++;
             
-            if (USE_CORS_PROXY && attempts < maxAttempts) {
-                console.log(`⚠️ SOL balance check failed with proxy, trying next... (${error.message})`);
-                switchToNextCorsProxy();
-                continue; // Try next proxy
+            if (attempts < maxAttempts) {
+                console.log(`⚠️ SOL balance check failed (${error.message}), trying next RPC...`);
+                switchToNextSolanaRpc();
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+                continue; // Try next RPC
             }
             
             console.error(`Error checking SOL balance for ${address}:`, error.message);
@@ -287,16 +312,16 @@ async function getBitcoinTransactions(address) {
     return [];
 }
 
-// Get Solana transactions with rate limit handling and automatic fallback
+// Get Solana transactions with rate limit handling and automatic RPC fallback
 async function getSolanaTransactions(address) {
     let attempts = 0;
-    const maxAttempts = USE_CORS_PROXY ? CORS_PROXIES.length : 1;
+    const maxAttempts = SOLANA_RPC_ENDPOINTS.length;
     
     while (attempts < maxAttempts) {
         try {
-            // Using Solana RPC to get signatures (transactions) for address with CORS proxy
-            const url = wrapWithCorsProxy('https://api.mainnet-beta.solana.com');
-            const response = await axios.post(url, {
+            // Use current Solana RPC endpoint
+            const rpcUrl = getCurrentSolanaRpc();
+            const response = await axios.post(rpcUrl, {
                 jsonrpc: '2.0',
                 id: 1,
                 method: 'getSignaturesForAddress',
@@ -313,9 +338,11 @@ async function getSolanaTransactions(address) {
         } catch (error) {
             attempts++;
             
-            if (USE_CORS_PROXY && attempts < maxAttempts) {
-                switchToNextCorsProxy();
-                continue; // Try next proxy
+            if (attempts < maxAttempts) {
+                console.log(`⚠️ SOL transaction fetch failed (${error.message}), trying next RPC...`);
+                switchToNextSolanaRpc();
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+                continue; // Try next RPC
             }
             
             if (error.response && error.response.status === 429) {
@@ -715,7 +742,8 @@ async function monitorAddress(userId, address, crypto) {
             for (const tx of transactions.slice(0, 10)) {
                 // Get transaction details to find amount
                 try {
-                    const txResponse = await axios.post('https://api.mainnet-beta.solana.com', {
+                    const rpcUrl = getCurrentSolanaRpc();
+                    const txResponse = await axios.post(rpcUrl, {
                         jsonrpc: '2.0',
                         id: 1,
                         method: 'getTransaction',
