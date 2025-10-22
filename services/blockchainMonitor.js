@@ -185,27 +185,42 @@ async function checkBitcoinBalance(address) {
     return '0';
 }
 
-// Check Solana balance
+// Check Solana balance with automatic fallback
 async function checkSolanaBalance(address) {
-    try {
-        // Using public Solana RPC endpoint with CORS proxy
-        const url = wrapWithCorsProxy('https://api.mainnet-beta.solana.com');
-        const response = await axios.post(url, {
-            jsonrpc: '2.0',
-            id: 1,
-            method: 'getBalance',
-            params: [address]
-        }, getAxiosConfig(10000));
-        
-        if (response.data && response.data.result && response.data.result.value !== undefined) {
-            const lamports = response.data.result.value;
-            return (lamports / 1000000000).toString(); // Convert lamports to SOL
+    let attempts = 0;
+    const maxAttempts = USE_CORS_PROXY ? CORS_PROXIES.length : 1;
+    
+    while (attempts < maxAttempts) {
+        try {
+            // Using public Solana RPC endpoint with CORS proxy
+            const url = wrapWithCorsProxy('https://api.mainnet-beta.solana.com');
+            const response = await axios.post(url, {
+                jsonrpc: '2.0',
+                id: 1,
+                method: 'getBalance',
+                params: [address]
+            }, getAxiosConfig(10000));
+            
+            if (response.data && response.data.result && response.data.result.value !== undefined) {
+                const lamports = response.data.result.value;
+                return (lamports / 1000000000).toString(); // Convert lamports to SOL
+            }
+            return '0';
+        } catch (error) {
+            attempts++;
+            
+            if (USE_CORS_PROXY && attempts < maxAttempts) {
+                console.log(`⚠️ SOL balance check failed with proxy, trying next... (${error.message})`);
+                switchToNextCorsProxy();
+                continue; // Try next proxy
+            }
+            
+            console.error(`Error checking SOL balance for ${address}:`, error.message);
+            return '0';
         }
-        return '0';
-    } catch (error) {
-        console.error(`Error checking SOL balance for ${address}:`, error.message);
-        return '0';
     }
+    
+    return '0';
 }
 
 // Get Ethereum transactions for an address
