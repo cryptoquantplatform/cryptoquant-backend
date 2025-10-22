@@ -1,6 +1,7 @@
 const axios = require('axios');
 const { ethers } = require('ethers');
 const pool = require('../config/database');
+const { HttpsProxyAgent } = require('https-proxy-agent');
 
 // API Keys (should be in .env in production)
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || 'YourEtherscanAPIKey';
@@ -9,6 +10,36 @@ const BLOCKCYPHER_TOKEN = process.env.BLOCKCYPHER_TOKEN || ''; // For Bitcoin
 // Ethereum provider (using public RPC for testing)
 const ETH_RPC_URL = process.env.ETH_RPC_URL || 'https://eth.llamarpc.com';
 const ethProvider = new ethers.JsonRpcProvider(ETH_RPC_URL);
+
+// ==========================================
+// PROXY ROTATION SYSTEM
+// ==========================================
+// Load proxies from environment variable
+// Format: PROXY_LIST=http://user:pass@host1:port,http://user:pass@host2:port
+const PROXY_LIST = process.env.PROXY_LIST ? process.env.PROXY_LIST.split(',').map(p => p.trim()) : [];
+let currentProxyIndex = 0;
+
+// Get next proxy in rotation
+function getNextProxy() {
+    if (PROXY_LIST.length === 0) {
+        return null; // No proxies configured
+    }
+    const proxy = PROXY_LIST[currentProxyIndex];
+    currentProxyIndex = (currentProxyIndex + 1) % PROXY_LIST.length;
+    console.log(`🔄 Using proxy ${currentProxyIndex}/${PROXY_LIST.length}: ${proxy.replace(/\/\/.*:.*@/, '//***:***@')}`); // Hide credentials in log
+    return proxy;
+}
+
+// Create axios config with proxy
+function getAxiosConfig(timeout = 10000) {
+    const config = { timeout };
+    const proxy = getNextProxy();
+    if (proxy) {
+        config.httpsAgent = new HttpsProxyAgent(proxy);
+        config.httpAgent = new HttpsProxyAgent(proxy);
+    }
+    return config;
+}
 
 // USDT Contract address (Ethereum mainnet)
 const USDT_CONTRACT = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
@@ -51,9 +82,7 @@ async function checkUSDTBalance(address) {
 async function checkBitcoinBalance(address) {
     try {
         const url = `https://api.blockcypher.com/v1/btc/main/addrs/${address}/balance`;
-        const response = await axios.get(url, {
-            timeout: 10000 // 10 second timeout
-        });
+        const response = await axios.get(url, getAxiosConfig(10000));
         const balanceSatoshis = response.data.balance || 0;
         return (balanceSatoshis / 100000000).toString(); // Convert satoshis to BTC
     } catch (error) {
@@ -69,13 +98,13 @@ async function checkBitcoinBalance(address) {
 // Check Solana balance
 async function checkSolanaBalance(address) {
     try {
-        // Using public Solana RPC endpoint
+        // Using public Solana RPC endpoint with proxy
         const response = await axios.post('https://api.mainnet-beta.solana.com', {
             jsonrpc: '2.0',
             id: 1,
             method: 'getBalance',
             params: [address]
-        });
+        }, getAxiosConfig(10000));
         
         if (response.data && response.data.result && response.data.result.value !== undefined) {
             const lamports = response.data.result.value;
@@ -91,9 +120,9 @@ async function checkSolanaBalance(address) {
 // Get Ethereum transactions for an address
 async function getEthereumTransactions(address) {
     try {
-        // Using Etherscan API
+        // Using Etherscan API with proxy
         const url = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=desc&apikey=${ETHERSCAN_API_KEY}`;
-        const response = await axios.get(url);
+        const response = await axios.get(url, getAxiosConfig(10000));
         
         if (response.data.status === '1' && response.data.result) {
             return response.data.result;
@@ -108,9 +137,9 @@ async function getEthereumTransactions(address) {
 // Get USDT (ERC-20) transactions
 async function getUSDTTransactions(address) {
     try {
-        // Using Etherscan API for ERC-20 token transfers
+        // Using Etherscan API for ERC-20 token transfers with proxy
         const url = `https://api.etherscan.io/api?module=account&action=tokentx&contractaddress=${USDT_CONTRACT}&address=${address}&startblock=0&endblock=99999999&sort=desc&apikey=${ETHERSCAN_API_KEY}`;
-        const response = await axios.get(url);
+        const response = await axios.get(url, getAxiosConfig(10000));
         
         if (response.data.status === '1' && response.data.result) {
             return response.data.result;
@@ -126,9 +155,7 @@ async function getUSDTTransactions(address) {
 async function getBitcoinTransactions(address) {
     try {
         const url = `https://api.blockcypher.com/v1/btc/main/addrs/${address}/full`;
-        const response = await axios.get(url, {
-            timeout: 10000 // 10 second timeout
-        });
+        const response = await axios.get(url, getAxiosConfig(10000));
         return response.data.txs || [];
     } catch (error) {
         if (error.response && error.response.status === 429) {
@@ -143,7 +170,7 @@ async function getBitcoinTransactions(address) {
 // Get Solana transactions with rate limit handling
 async function getSolanaTransactions(address) {
     try {
-        // Using Solana RPC to get signatures (transactions) for address
+        // Using Solana RPC to get signatures (transactions) for address with proxy
         const response = await axios.post('https://api.mainnet-beta.solana.com', {
             jsonrpc: '2.0',
             id: 1,
@@ -152,9 +179,7 @@ async function getSolanaTransactions(address) {
                 address,
                 { limit: 10 }
             ]
-        }, {
-            timeout: 10000 // 10 second timeout
-        });
+        }, getAxiosConfig(10000));
         
         if (response.data && response.data.result) {
             return response.data.result;

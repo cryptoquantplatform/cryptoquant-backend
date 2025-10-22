@@ -39,6 +39,9 @@ ETHERSCAN_API_KEY=your_etherscan_api_key
 BLOCKCYPHER_TOKEN=your_blockcypher_token
 SOLANA_RPC_URL=https://your-premium-solana-endpoint.com
 ETH_RPC_URL=https://eth.llamarpc.com
+
+# Proxy Rotation (to avoid 429 rate limit errors)
+PROXY_LIST=http://user:pass@proxy1.example.com:8080,http://user:pass@proxy2.example.com:8080
 ```
 
 ---
@@ -97,6 +100,24 @@ openssl rand -base64 32
 - Production: `https://your-app.vercel.app`
 - Development: `http://localhost:3000`
 - Multiple: `https://app.yourdomain.com,https://www.yourdomain.com`
+
+### PROXY_LIST
+**What is this:**
+- Rotates through multiple proxy servers for API requests
+- Helps avoid 429 rate limit errors from blockchain APIs
+- Optional but recommended for production
+
+**Format:**
+```bash
+PROXY_LIST=http://user:pass@proxy1.com:8080,http://user:pass@proxy2.com:8080,http://user:pass@proxy3.com:8080
+```
+
+**Where to get proxies:**
+- Webshare.io ($50/month for 10 proxies)
+- Smartproxy.com ($75/month)
+- Bright Data ($500/month)
+
+**See PROXY_SETUP.md for detailed instructions!**
 
 ### ETHERSCAN_API_KEY
 **Where to get it:**
