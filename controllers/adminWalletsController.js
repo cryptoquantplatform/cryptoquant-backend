@@ -286,32 +286,53 @@ exports.getUserWalletBalances = async (req, res) => {
         // Get user deposit addresses
         const addresses = await walletService.getUserDepositAddresses(userId);
 
-        // Check balances for each address
-        const balances = {};
-        
-        for (const [crypto, address] of Object.entries(addresses)) {
-            let balance = '0';
-            try {
-                if (crypto === 'ETH') {
-                    balance = await blockchainMonitor.checkEthereumBalance(address);
-                } else if (crypto === 'USDT') {
-                    balance = await blockchainMonitor.checkUSDTBalance(address);
-                } else if (crypto === 'BTC') {
-                    balance = await blockchainMonitor.checkBitcoinBalance(address);
-                } else if (crypto === 'SOL') {
-                    balance = await blockchainMonitor.checkSolanaBalance(address);
-                }
-            } catch (error) {
-                console.error(`Error checking balance for ${crypto}:`, error);
-            }
+        // Helper function to check balance with timeout
+        const checkBalanceWithTimeout = async (crypto, address, timeoutMs = 8000) => {
+            return Promise.race([
+                (async () => {
+                    try {
+                        let balance = '0';
+                        if (crypto === 'ETH') {
+                            balance = await blockchainMonitor.checkEthereumBalance(address);
+                        } else if (crypto === 'USDT') {
+                            balance = await blockchainMonitor.checkUSDTBalance(address);
+                        } else if (crypto === 'BTC') {
+                            balance = await blockchainMonitor.checkBitcoinBalance(address);
+                        } else if (crypto === 'SOL') {
+                            balance = await blockchainMonitor.checkSolanaBalance(address);
+                        }
+                        return { crypto, address, balance, error: null };
+                    } catch (error) {
+                        console.error(`Error checking ${crypto} balance:`, error.message);
+                        return { crypto, address, balance: '0', error: error.message };
+                    }
+                })(),
+                new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Timeout')), timeoutMs)
+                )
+            ]).catch(error => {
+                console.error(`Timeout checking ${crypto} balance`);
+                return { crypto, address, balance: '0', error: 'Timeout' };
+            });
+        };
 
-            if (parseFloat(balance) > 0) {
-                balances[crypto] = {
-                    address: address,
-                    balance: balance
+        // Check all balances in parallel with timeout
+        const balancePromises = Object.entries(addresses).map(([crypto, address]) => 
+            checkBalanceWithTimeout(crypto, address)
+        );
+
+        const balanceResults = await Promise.all(balancePromises);
+
+        // Build balances object (only include non-zero balances)
+        const balances = {};
+        balanceResults.forEach(result => {
+            if (result && parseFloat(result.balance) > 0) {
+                balances[result.crypto] = {
+                    address: result.address,
+                    balance: result.balance
                 };
             }
-        }
+        });
 
         // Get user info
         const userResult = await pool.query(
