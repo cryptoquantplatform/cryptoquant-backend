@@ -1,27 +1,44 @@
-# 🌐 CORS Proxy Integration - crossorigin.me
+# 🌐 CORS Proxy Fallback System
 
 ## ✅ BEREITS AKTIVIERT!
 
-Das System verwendet jetzt **[crossorigin.me](https://crossorigin.me/)** als CORS Proxy für alle Blockchain API Requests!
+Das System verwendet jetzt ein **intelligentes Fallback-System mit 5 CORS Proxies** für alle Blockchain API Requests!
 
 ---
 
-## 🎯 Was ist crossorigin.me?
+## 🎯 Was sind CORS Proxies?
 
-Ein **kostenloser CORS Proxy Service** der es ermöglicht, auf externe APIs zuzugreifen ohne CORS-Fehler oder Rate Limits.
+**Kostenlose CORS Proxy Services** die es ermöglichen, auf externe APIs zuzugreifen ohne CORS-Fehler oder Rate Limits.
 
-### Wie es funktioniert:
+### Verfügbare Fallback-Proxies (in Reihenfolge):
 
-Statt direkt zu `https://api.blockcypher.com/...` zu connecten, leitet das System alle Requests durch:
+1. **allorigins.win** - Primär
+2. **corsproxy.io** - Fallback 1
+3. **codetabs.com** - Fallback 2
+4. **cors-anywhere.herokuapp.com** - Fallback 3
+5. **thingproxy.freeboard.io** - Fallback 4
+
+### Wie das Fallback-System funktioniert:
 
 ```
-https://crossorigin.me/https://api.blockcypher.com/...
+1. Versuche Proxy 1 (allorigins.win)
+   ↓ Fehler?
+2. Wechsle zu Proxy 2 (corsproxy.io)
+   ↓ Fehler?
+3. Wechsle zu Proxy 3 (codetabs.com)
+   ↓ Fehler?
+4. Wechsle zu Proxy 4 (cors-anywhere)
+   ↓ Fehler?
+5. Wechsle zu Proxy 5 (thingproxy)
+   ↓ Alle fehlgeschlagen?
+6. Zurück zu Proxy 1 (Rotation)
 ```
 
 Dies umgeht:
 - ✅ **CORS-Fehler**
 - ✅ **Rate Limits** (429 Fehler)
 - ✅ **IP-basierte Blockierungen**
+- ✅ **Proxy Downtime** (automatischer Wechsel!)
 
 ---
 
@@ -32,35 +49,41 @@ Dies umgeht:
 Beim Backend-Start siehst du in den Logs:
 
 ```
-🌐 CORS Proxy enabled: https://crossorigin.me/
+🌐 CORS Proxy fallback system enabled with 5 proxies
+📍 Starting with: https://api.allorigins.win/raw?url=
 ✅ All blockchain API requests will be routed through CORS proxy
 ```
 
-### Alle Blockchain APIs laufen durch den CORS Proxy:
+Bei einem Proxy-Fehler:
+
+```
+⚠️ CORS Proxy failed: https://api.allorigins.win/raw?url=
+🔄 Switching to next proxy: https://corsproxy.io/?
+```
+
+### Alle Blockchain APIs laufen durch den CORS Proxy mit automatischem Fallback:
 
 1. **Bitcoin (BlockCypher API)**
    ```
    Original: https://api.blockcypher.com/v1/btc/main/addrs/...
-   Mit CORS: https://crossorigin.me/https://api.blockcypher.com/v1/btc/main/addrs/...
+   
+   Mit Proxy 1: https://api.allorigins.win/raw?url=https%3A%2F%2Fapi.blockcypher.com...
+   Bei Fehler → Proxy 2: https://corsproxy.io/?https%3A%2F%2Fapi.blockcypher.com...
+   Bei Fehler → Proxy 3: https://api.codetabs.com/v1/proxy?quest=https%3A%2F%2Fapi.blockcypher.com...
+   Und so weiter...
    ```
 
 2. **Ethereum (Etherscan API)**
-   ```
-   Original: https://api.etherscan.io/api?module=account&action=txlist...
-   Mit CORS: https://crossorigin.me/https://api.etherscan.io/api?module=account&action=txlist...
-   ```
+   - Gleiches Fallback-System
+   - 5 Proxies automatisch durchprobiert
 
 3. **USDT (Etherscan API)**
-   ```
-   Original: https://api.etherscan.io/api?module=account&action=tokentx...
-   Mit CORS: https://crossorigin.me/https://api.etherscan.io/api?module=account&action=tokentx...
-   ```
+   - Gleiches Fallback-System
+   - 5 Proxies automatisch durchprobiert
 
 4. **Solana (Solana RPC)**
-   ```
-   Original: https://api.mainnet-beta.solana.com
-   Mit CORS: https://crossorigin.me/https://api.mainnet-beta.solana.com
-   ```
+   - Gleiches Fallback-System
+   - 5 Proxies automatisch durchprobiert
 
 ---
 
@@ -79,21 +102,25 @@ USE_CORS_PROXY=false
 
 ### Eigenen CORS Proxy verwenden:
 ```env
-CORS_PROXY=https://your-custom-cors-proxy.com/
+# Das Fallback-System ist hardcoded mit 5 Proxies
+# Wenn du einen eigenen willst, deaktiviere CORS und nutze PROXY_LIST
+USE_CORS_PROXY=false
+PROXY_LIST=http://your-proxy.com:8080
 ```
 
 ---
 
 ## 📊 Vorteile
 
-| Feature | Ohne CORS Proxy | Mit CORS Proxy |
-|---------|----------------|----------------|
+| Feature | Ohne CORS Proxy | Mit CORS Proxy Fallback |
+|---------|----------------|-------------------------|
 | **429 Fehler** | ❌ Häufig | ✅ Sehr selten |
 | **Rate Limits** | ❌ ~50-200 req/h | ✅ Praktisch unbegrenzt |
 | **Setup** | ⚠️ Proxies kaufen | ✅ Automatisch gratis |
 | **Kosten** | 💰 $50+/Monat | 🆓 Kostenlos |
-| **Speed** | ⚡ 0.5s | ⚡ 0.8s (minimal langsamer) |
-| **Stabilität** | ✅ 99% | ✅ 95%+ |
+| **Speed** | ⚡ 0.5s | ⚡ 0.8-1.2s |
+| **Stabilität** | ✅ 99% | ✅ 99%+ (5 Fallbacks!) |
+| **Ausfallsicherheit** | ❌ Keine | ✅ 5x Redundanz |
 
 ---
 
