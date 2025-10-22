@@ -146,24 +146,17 @@ exports.createWithdrawal = async (req, res) => {
         );
 
         const user = userResult.rows[0];
-        const userBalance = parseFloat(user.balance);
+        const totalEarnings = parseFloat(user.total_earnings || 0);
         const withdrawAmountUSD = parseFloat(amount);
 
-        // Validate minimum withdrawal
-        if (withdrawAmountUSD < 10) {
+        // No minimum withdrawal - accept any amount
+        
+        // Check available balance (only earnings are withdrawable!)
+        if (withdrawAmountUSD > totalEarnings) {
             await client.query('ROLLBACK');
             return res.status(400).json({ 
                 success: false, 
-                message: 'Minimum withdrawal is 10 USD' 
-            });
-        }
-
-        // Check balance
-        if (withdrawAmountUSD > userBalance) {
-            await client.query('ROLLBACK');
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Insufficient balance' 
+                message: `Insufficient withdrawable balance. You have $${totalEarnings.toFixed(2)} available (earnings only, deposits are locked)`
             });
         }
 
@@ -185,11 +178,10 @@ exports.createWithdrawal = async (req, res) => {
         
         console.log(`💱 Converting ${finalAmountUSD} USD → ${cryptoAmount.toFixed(8)} ${crypto} @ $${cryptoPrice}`);
 
-        // Deduct from balance (in USD)
-        const newBalance = userBalance - withdrawAmountUSD;
+        // Deduct from both balance AND total_earnings (earnings only!)
         await client.query(
-            'UPDATE users SET balance = $1 WHERE id = $2',
-            [formatBalance(newBalance), userId]
+            'UPDATE users SET balance = balance - $1, total_earnings = total_earnings - $1 WHERE id = $2',
+            [withdrawAmountUSD, userId]
         );
 
         // Create withdrawal record (amount in crypto, not USD)

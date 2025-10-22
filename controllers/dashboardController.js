@@ -210,6 +210,7 @@ exports.getDashboard = async (req, res) => {
                     referralCode: user.referral_code,
                     balance: formatBalance(user.balance),
                     totalEarnings: formatBalance(user.total_earnings),
+                    availableBalance: formatBalance(user.total_earnings), // Only earnings withdrawable!
                     level: levelInfo.level
                 },
                 clicks: {
@@ -390,6 +391,7 @@ exports.getStats = async (req, res) => {
             success: true,
             balance: formatBalance(user.balance),
             totalEarnings: formatBalance(user.total_earnings),
+            availableBalance: formatBalance(user.total_earnings), // Only earnings are withdrawable!
             todayEarnings: formatBalance(todayEarnings)
         });
 
