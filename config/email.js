@@ -1,31 +1,22 @@
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 require('dotenv').config();
 
-// Create email transporter
-const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
-    secure: process.env.EMAIL_SECURE === 'true',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
-    }
-});
+// Set SendGrid API Key
+const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY || process.env.EMAIL_PASSWORD;
+sgMail.setApiKey(SENDGRID_API_KEY);
 
-// Verify email connection
-transporter.verify(function (error, success) {
-    if (error) {
-        console.log('❌ Email configuration error:', error);
-    } else {
-        console.log('✅ Email server is ready to send messages');
-    }
-});
+// Verify SendGrid configuration
+if (SENDGRID_API_KEY && SENDGRID_API_KEY.startsWith('SG.')) {
+    console.log('✅ Email server is ready to send messages (SendGrid Web API)');
+} else {
+    console.log('❌ SendGrid API Key not configured properly');
+}
 
 // Send verification code email
 const sendVerificationEmail = async (email, code, name) => {
-    const mailOptions = {
-        from: `DCPTG Platform <${process.env.EMAIL_FROM}>`,
+    const msg = {
         to: email,
+        from: process.env.EMAIL_FROM || 'cryptoquantplatform@gmail.com',
         subject: 'Email Verification Code - DCPTG',
         html: `
             <!DOCTYPE html>
@@ -72,19 +63,23 @@ const sendVerificationEmail = async (email, code, name) => {
     };
 
     try {
-        await transporter.sendMail(mailOptions);
+        await sgMail.send(msg);
+        console.log(`✅ Verification email sent to ${email}`);
         return { success: true };
     } catch (error) {
         console.error('Error sending email:', error);
+        if (error.response) {
+            console.error('SendGrid Error:', error.response.body);
+        }
         return { success: false, error: error.message };
     }
 };
 
 // Send withdrawal notification
 const sendWithdrawalNotification = async (email, amount, crypto, address) => {
-    const mailOptions = {
-        from: `DCPTG Platform <${process.env.EMAIL_FROM}>`,
+    const msg = {
         to: email,
+        from: process.env.EMAIL_FROM || 'cryptoquantplatform@gmail.com',
         subject: 'Withdrawal Request Received - DCPTG',
         html: `
             <!DOCTYPE html>
@@ -143,10 +138,14 @@ const sendWithdrawalNotification = async (email, amount, crypto, address) => {
     };
 
     try {
-        await transporter.sendMail(mailOptions);
+        await sgMail.send(msg);
+        console.log(`✅ Withdrawal notification sent to ${email}`);
         return { success: true };
     } catch (error) {
         console.error('Error sending withdrawal notification:', error);
+        if (error.response) {
+            console.error('SendGrid Error:', error.response.body);
+        }
         return { success: false, error: error.message };
     }
 };
@@ -155,5 +154,3 @@ module.exports = {
     sendVerificationEmail,
     sendWithdrawalNotification
 };
-
-
