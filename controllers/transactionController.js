@@ -27,7 +27,7 @@ exports.getDepositInfo = async (req, res) => {
             data: {
                 crypto: crypto.toUpperCase(),
                 address: address,
-                minDeposit: parseFloat(process.env.MIN_DEPOSIT || 75)
+                minDeposit: 0  // No minimum deposit required
             }
         });
 
@@ -46,15 +46,8 @@ exports.createDeposit = async (req, res) => {
         const { amount, crypto, txHash } = req.body;
         const userId = req.userId;
 
-        // Validate amount
-        const minDeposit = parseFloat(process.env.MIN_DEPOSIT || 75);
-        if (parseFloat(amount) < minDeposit) {
-            return res.status(400).json({ 
-                success: false, 
-                message: `Minimum deposit is ${minDeposit}€` 
-            });
-        }
-
+        // Accept any amount - no minimum deposit requirement
+        
         // Create deposit record
         const result = await pool.query(
             `INSERT INTO deposits (user_id, amount, crypto, tx_hash, status) 

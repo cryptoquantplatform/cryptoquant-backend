@@ -255,8 +255,8 @@ const createTables = async () => {
         // Insert default system settings
         await client.query(`
             INSERT INTO system_settings (setting_key, setting_value, description) VALUES
-            ('min_deposit', '75', 'Minimum deposit amount in EUR'),
-            ('min_withdrawal', '10', 'Minimum withdrawal amount'),
+            ('min_deposit', '0', 'Minimum deposit amount (0 = no minimum)'),
+            ('min_withdrawal', '0', 'Minimum withdrawal amount (0 = no minimum)'),
             ('click_percentage_min', '5', 'Minimum click earning percentage'),
             ('click_percentage_max', '8', 'Maximum click earning percentage'),
             ('level_1_clicks', '3', 'Daily clicks for level 1'),

@@ -346,12 +346,10 @@ async function creditUserBalance(client, userId, amount, crypto, txHash) {
         
         console.log(`💰 Converting ${amount} ${crypto} × $${priceUSD} = $${usdValue.toFixed(4)} USD`);
         
-        // Ensure minimum credit of $0.01 if deposit exists
-        const creditAmount = usdValue < 0.01 && usdValue > 0 ? 0.01 : usdValue;
+        // Accept any amount, no minimum limit
+        const creditAmount = usdValue;
         
-        if (creditAmount !== usdValue) {
-            console.log(`⚠️ Adjusted credit from $${usdValue.toFixed(4)} to $${creditAmount.toFixed(2)} (minimum $0.01)`);
-        }
+        console.log(`✅ Crediting $${creditAmount.toFixed(4)} USD to user ${userId}`);
         
         // Update user balance with USD value
         await client.query(
@@ -410,7 +408,8 @@ async function distributeDepositBonus(client, depositorUserId, depositAmount) {
             
             const bonus = depositAmount * bonusRate;
             
-            if (bonus > 0.01) { // Only credit if more than 1 cent
+            // Credit any bonus amount, no minimum
+            if (bonus > 0) {
                 await client.query(
                     'UPDATE users SET balance = balance + $1 WHERE id = $2',
                     [bonus, uplineUser.user_id]
