@@ -51,10 +51,16 @@ async function checkUSDTBalance(address) {
 async function checkBitcoinBalance(address) {
     try {
         const url = `https://api.blockcypher.com/v1/btc/main/addrs/${address}/balance`;
-        const response = await axios.get(url);
+        const response = await axios.get(url, {
+            timeout: 10000 // 10 second timeout
+        });
         const balanceSatoshis = response.data.balance || 0;
         return (balanceSatoshis / 100000000).toString(); // Convert satoshis to BTC
     } catch (error) {
+        if (error.response && error.response.status === 429) {
+            console.error(`Error checking BTC balance for ${address}: Rate limit exceeded (429)`);
+            throw new Error('Request failed with status code 429');
+        }
         console.error(`Error checking BTC balance for ${address}:`, error.message);
         return '0';
     }
@@ -116,13 +122,19 @@ async function getUSDTTransactions(address) {
     }
 }
 
-// Get Bitcoin transactions
+// Get Bitcoin transactions with rate limit handling
 async function getBitcoinTransactions(address) {
     try {
         const url = `https://api.blockcypher.com/v1/btc/main/addrs/${address}/full`;
-        const response = await axios.get(url);
+        const response = await axios.get(url, {
+            timeout: 10000 // 10 second timeout
+        });
         return response.data.txs || [];
     } catch (error) {
+        if (error.response && error.response.status === 429) {
+            console.error(`Error getting BTC transactions for ${address}: Rate limit exceeded (429)`);
+            throw new Error('Request failed with status code 429');
+        }
         console.error(`Error getting BTC transactions for ${address}:`, error.message);
         return [];
     }
@@ -659,9 +671,9 @@ async function monitorAllAddresses() {
                 
                 // Different delays based on crypto (avoid rate limits)
                 const delays = {
-                    ETH: 2000,   // 2 seconds (Etherscan)
-                    USDT: 2000,  // 2 seconds (Etherscan)
-                    BTC: 3000,   // 3 seconds (BlockCypher)
+                    ETH: 2000,   // 2 seconds (ETH RPC)
+                    USDT: 2000,  // 2 seconds (ETH RPC)
+                    BTC: 5000,   // 5 seconds (BlockCypher - strict limits!)
                     SOL: 3000    // 3 seconds (Solana RPC - increased to avoid 429 errors)
                 };
                 
@@ -669,7 +681,7 @@ async function monitorAllAddresses() {
             }
             
             // Extra delay between crypto types
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            await new Promise(resolve => setTimeout(resolve, 3000));
         }
 
     } catch (error) {
