@@ -40,7 +40,11 @@ BLOCKCYPHER_TOKEN=your_blockcypher_token
 SOLANA_RPC_URL=https://your-premium-solana-endpoint.com
 ETH_RPC_URL=https://eth.llamarpc.com
 
-# Proxy Rotation (to avoid 429 rate limit errors)
+# CORS Proxy (ENABLED BY DEFAULT - FREE!)
+USE_CORS_PROXY=true
+CORS_PROXY=https://crossorigin.me/
+
+# Manual Proxy Rotation (alternative to CORS proxy)
 PROXY_LIST=http://user:pass@proxy1.example.com:8080,http://user:pass@proxy2.example.com:8080
 ```
 
@@ -101,11 +105,37 @@ openssl rand -base64 32
 - Development: `http://localhost:3000`
 - Multiple: `https://app.yourdomain.com,https://www.yourdomain.com`
 
+### USE_CORS_PROXY
+**What is this:**
+- Routes all blockchain API requests through crossorigin.me CORS proxy
+- Bypasses rate limits and CORS errors
+- **ENABLED BY DEFAULT** - Free and automatic!
+
+**Values:**
+```bash
+USE_CORS_PROXY=true   # Default - Uses CORS proxy (recommended!)
+USE_CORS_PROXY=false  # Disables CORS proxy
+```
+
+**See CORS_PROXY_GUIDE.md for details!**
+
+### CORS_PROXY
+**What is this:**
+- URL of CORS proxy to use
+- Default is crossorigin.me (free)
+
+**Format:**
+```bash
+CORS_PROXY=https://crossorigin.me/
+# Or use alternative:
+CORS_PROXY=https://cors-anywhere.herokuapp.com/
+```
+
 ### PROXY_LIST
 **What is this:**
 - Rotates through multiple proxy servers for API requests
-- Helps avoid 429 rate limit errors from blockchain APIs
-- Optional but recommended for production
+- Alternative to CORS proxy (paid)
+- Only use if CORS proxy is not enough
 
 **Format:**
 ```bash
