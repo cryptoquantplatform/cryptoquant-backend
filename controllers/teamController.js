@@ -87,7 +87,7 @@ exports.getTeam = async (req, res) => {
             success: true,
             data: {
                 referralCode: referralCode,
-                referralLink: `${process.env.FRONTEND_URL || 'http://localhost'}/register.html?ref=${referralCode}`,
+                referralLink: `${process.env.FRONTEND_URL || 'http://localhost'}/auth.html?ref=${referralCode}`,
                 stats: {
                     totalMembers, // TOTAL pyramid size
                     activeMembers,
