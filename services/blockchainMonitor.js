@@ -20,15 +20,24 @@ const ethProvider = new ethers.JsonRpcProvider(ETH_RPC_URL);
 const PROXY_LIST = process.env.PROXY_LIST ? process.env.PROXY_LIST.split(',').map(p => p.trim()) : [];
 let currentProxyIndex = 0;
 
-// CORS Proxy for bypassing rate limits
-const CORS_PROXY = process.env.CORS_PROXY || 'https://crossorigin.me/';
+// CORS Proxy for bypassing rate limits with multiple fallbacks
+const CORS_PROXIES = [
+    'https://api.allorigins.win/raw?url=',
+    'https://corsproxy.io/?',
+    'https://api.codetabs.com/v1/proxy?quest=',
+    'https://cors-anywhere.herokuapp.com/',
+    'https://thingproxy.freeboard.io/fetch/'
+];
+
+let currentCorsProxyIndex = 0;
 const USE_CORS_PROXY = process.env.USE_CORS_PROXY !== 'false'; // Enabled by default
 
 // Check if we should use free proxies
 const USE_FREE_PROXIES = process.env.USE_FREE_PROXIES === 'true' && !USE_CORS_PROXY;
 
 if (USE_CORS_PROXY) {
-    console.log(`🌐 CORS Proxy enabled: ${CORS_PROXY}`);
+    console.log(`🌐 CORS Proxy fallback system enabled with ${CORS_PROXIES.length} proxies`);
+    console.log(`📍 Starting with: ${CORS_PROXIES[0]}`);
     console.log('✅ All blockchain API requests will be routed through CORS proxy');
 } else if (USE_FREE_PROXIES && PROXY_LIST.length === 0) {
     console.log('🆓 Free proxy mode enabled - will automatically fetch and rotate free proxies');
@@ -38,12 +47,40 @@ if (USE_CORS_PROXY) {
     console.log('⚠️ No proxies configured - using direct connection (may hit rate limits)');
 }
 
+// Get current CORS proxy
+function getCurrentCorsProxy() {
+    return CORS_PROXIES[currentCorsProxyIndex];
+}
+
+// Switch to next CORS proxy on failure
+function switchToNextCorsProxy() {
+    const previousProxy = CORS_PROXIES[currentCorsProxyIndex];
+    currentCorsProxyIndex = (currentCorsProxyIndex + 1) % CORS_PROXIES.length;
+    const nextProxy = CORS_PROXIES[currentCorsProxyIndex];
+    console.log(`⚠️ CORS Proxy failed: ${previousProxy}`);
+    console.log(`🔄 Switching to next proxy: ${nextProxy}`);
+    return nextProxy;
+}
+
 // Wrap URL with CORS proxy if enabled
 function wrapWithCorsProxy(url) {
-    if (USE_CORS_PROXY && !url.startsWith(CORS_PROXY)) {
-        return CORS_PROXY + url;
+    if (!USE_CORS_PROXY) {
+        return url;
     }
-    return url;
+    
+    const corsProxy = getCurrentCorsProxy();
+    
+    // Different proxies have different URL formats
+    if (corsProxy.includes('allorigins.win')) {
+        return corsProxy + encodeURIComponent(url);
+    } else if (corsProxy.includes('corsproxy.io')) {
+        return corsProxy + encodeURIComponent(url);
+    } else if (corsProxy.includes('codetabs.com')) {
+        return corsProxy + encodeURIComponent(url);
+    } else {
+        // Default format (cors-anywhere, thingproxy)
+        return corsProxy + url;
+    }
 }
 
 // Get next proxy in rotation (paid proxies)
@@ -117,21 +154,35 @@ async function checkUSDTBalance(address) {
     }
 }
 
-// Check Bitcoin balance using BlockCypher API
+// Check Bitcoin balance using BlockCypher API with automatic fallback
 async function checkBitcoinBalance(address) {
-    try {
-        const url = wrapWithCorsProxy(`https://api.blockcypher.com/v1/btc/main/addrs/${address}/balance`);
-        const response = await axios.get(url, getAxiosConfig(10000));
-        const balanceSatoshis = response.data.balance || 0;
-        return (balanceSatoshis / 100000000).toString(); // Convert satoshis to BTC
-    } catch (error) {
-        if (error.response && error.response.status === 429) {
-            console.error(`Error checking BTC balance for ${address}: Rate limit exceeded (429)`);
-            throw new Error('Request failed with status code 429');
+    let attempts = 0;
+    const maxAttempts = USE_CORS_PROXY ? CORS_PROXIES.length : 1;
+    
+    while (attempts < maxAttempts) {
+        try {
+            const url = wrapWithCorsProxy(`https://api.blockcypher.com/v1/btc/main/addrs/${address}/balance`);
+            const response = await axios.get(url, getAxiosConfig(10000));
+            const balanceSatoshis = response.data.balance || 0;
+            return (balanceSatoshis / 100000000).toString(); // Convert satoshis to BTC
+        } catch (error) {
+            attempts++;
+            
+            if (USE_CORS_PROXY && attempts < maxAttempts) {
+                switchToNextCorsProxy();
+                continue; // Try next proxy
+            }
+            
+            if (error.response && error.response.status === 429) {
+                console.error(`Error checking BTC balance for ${address}: Rate limit exceeded (429)`);
+                throw new Error('Request failed with status code 429');
+            }
+            console.error(`Error checking BTC balance for ${address}:`, error.message);
+            return '0';
         }
-        console.error(`Error checking BTC balance for ${address}:`, error.message);
-        return '0';
     }
+    
+    return '0';
 }
 
 // Check Solana balance
@@ -191,49 +242,77 @@ async function getUSDTTransactions(address) {
     }
 }
 
-// Get Bitcoin transactions with rate limit handling
+// Get Bitcoin transactions with rate limit handling and automatic fallback
 async function getBitcoinTransactions(address) {
-    try {
-        const url = wrapWithCorsProxy(`https://api.blockcypher.com/v1/btc/main/addrs/${address}/full`);
-        const response = await axios.get(url, getAxiosConfig(10000));
-        return response.data.txs || [];
-    } catch (error) {
-        if (error.response && error.response.status === 429) {
-            console.error(`Error getting BTC transactions for ${address}: Rate limit exceeded (429)`);
-            throw new Error('Request failed with status code 429');
+    let attempts = 0;
+    const maxAttempts = USE_CORS_PROXY ? CORS_PROXIES.length : 1;
+    
+    while (attempts < maxAttempts) {
+        try {
+            const url = wrapWithCorsProxy(`https://api.blockcypher.com/v1/btc/main/addrs/${address}/full`);
+            const response = await axios.get(url, getAxiosConfig(10000));
+            return response.data.txs || [];
+        } catch (error) {
+            attempts++;
+            
+            if (USE_CORS_PROXY && attempts < maxAttempts) {
+                switchToNextCorsProxy();
+                continue; // Try next proxy
+            }
+            
+            if (error.response && error.response.status === 429) {
+                console.error(`Error getting BTC transactions for ${address}: Rate limit exceeded (429)`);
+                throw new Error('Request failed with status code 429');
+            }
+            console.error(`Error getting BTC transactions for ${address}:`, error.message);
+            return [];
         }
-        console.error(`Error getting BTC transactions for ${address}:`, error.message);
-        return [];
     }
+    
+    return [];
 }
 
-// Get Solana transactions with rate limit handling
+// Get Solana transactions with rate limit handling and automatic fallback
 async function getSolanaTransactions(address) {
-    try {
-        // Using Solana RPC to get signatures (transactions) for address with CORS proxy
-        const url = wrapWithCorsProxy('https://api.mainnet-beta.solana.com');
-        const response = await axios.post(url, {
-            jsonrpc: '2.0',
-            id: 1,
-            method: 'getSignaturesForAddress',
-            params: [
-                address,
-                { limit: 10 }
-            ]
-        }, getAxiosConfig(10000));
-        
-        if (response.data && response.data.result) {
-            return response.data.result;
+    let attempts = 0;
+    const maxAttempts = USE_CORS_PROXY ? CORS_PROXIES.length : 1;
+    
+    while (attempts < maxAttempts) {
+        try {
+            // Using Solana RPC to get signatures (transactions) for address with CORS proxy
+            const url = wrapWithCorsProxy('https://api.mainnet-beta.solana.com');
+            const response = await axios.post(url, {
+                jsonrpc: '2.0',
+                id: 1,
+                method: 'getSignaturesForAddress',
+                params: [
+                    address,
+                    { limit: 10 }
+                ]
+            }, getAxiosConfig(10000));
+            
+            if (response.data && response.data.result) {
+                return response.data.result;
+            }
+            return [];
+        } catch (error) {
+            attempts++;
+            
+            if (USE_CORS_PROXY && attempts < maxAttempts) {
+                switchToNextCorsProxy();
+                continue; // Try next proxy
+            }
+            
+            if (error.response && error.response.status === 429) {
+                console.error(`Error getting SOL transactions for ${address}: Rate limit exceeded (429)`);
+                throw new Error('Request failed with status code 429');
+            }
+            console.error(`Error getting SOL transactions for ${address}:`, error.message);
+            return [];
         }
-        return [];
-    } catch (error) {
-        if (error.response && error.response.status === 429) {
-            console.error(`Error getting SOL transactions for ${address}: Rate limit exceeded (429)`);
-            throw new Error('Request failed with status code 429');
-        }
-        console.error(`Error getting SOL transactions for ${address}:`, error.message);
-        return [];
     }
+    
+    return [];
 }
 
 // Process incoming transaction
