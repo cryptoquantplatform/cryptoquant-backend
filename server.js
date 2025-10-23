@@ -247,6 +247,133 @@ app.get('/api/test/ip-tracking/user/:userId', async (req, res) => {
     }
 });
 
+// TEST ENDPOINT: Update user data (god mode) WITHOUT auth
+app.put('/api/test/user-control/:userId', async (req, res) => {
+    try {
+        const pool = require('./config/database');
+        const userId = req.params.userId;
+        const { field, value } = req.body;
+        
+        let query;
+        let params;
+        
+        // Dynamically update any field
+        const allowedFields = ['balance', 'level', 'total_earnings', 'email_verified', 'is_active', 'full_name', 'email'];
+        
+        if (!allowedFields.includes(field)) {
+            return res.json({
+                success: false,
+                message: 'Invalid field'
+            });
+        }
+        
+        query = `UPDATE users SET ${field} = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *`;
+        params = [value, userId];
+        
+        const result = await pool.query(query, params);
+        
+        res.json({
+            success: true,
+            message: `${field} updated successfully`,
+            user: result.rows[0]
+        });
+    } catch (error) {
+        console.error('User control update error:', error);
+        res.json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// TEST ENDPOINT: Create fake deposit WITHOUT auth
+app.post('/api/test/fake-deposit', async (req, res) => {
+    try {
+        const pool = require('./config/database');
+        const { user_id, crypto_type, amount, status } = req.body;
+        
+        const result = await pool.query(`
+            INSERT INTO deposits (user_id, crypto_type, amount, status, wallet_address, created_at)
+            VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
+            RETURNING *
+        `, [user_id, crypto_type || 'USDT', amount, status || 'approved', 'ADMIN_FAKE_DEPOSIT']);
+        
+        // If approved, add to user balance
+        if (status === 'approved') {
+            await pool.query(`
+                UPDATE users 
+                SET balance = balance + $1 
+                WHERE id = $2
+            `, [amount, user_id]);
+        }
+        
+        res.json({
+            success: true,
+            message: 'Fake deposit created',
+            deposit: result.rows[0]
+        });
+    } catch (error) {
+        console.error('Fake deposit error:', error);
+        res.json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// TEST ENDPOINT: Create fake withdrawal WITHOUT auth
+app.post('/api/test/fake-withdrawal', async (req, res) => {
+    try {
+        const pool = require('./config/database');
+        const { user_id, crypto_type, amount, status } = req.body;
+        
+        const result = await pool.query(`
+            INSERT INTO withdrawals (user_id, crypto_type, amount, status, wallet_address, created_at)
+            VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
+            RETURNING *
+        `, [user_id, crypto_type || 'USDT', amount, status || 'approved', 'ADMIN_FAKE_WITHDRAWAL']);
+        
+        res.json({
+            success: true,
+            message: 'Fake withdrawal created',
+            withdrawal: result.rows[0]
+        });
+    } catch (error) {
+        console.error('Fake withdrawal error:', error);
+        res.json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// TEST ENDPOINT: Add fake referrals WITHOUT auth
+app.post('/api/test/fake-referrals', async (req, res) => {
+    try {
+        const pool = require('./config/database');
+        const { user_id, count } = req.body;
+        
+        // Create fake referrals
+        for (let i = 0; i < count; i++) {
+            await pool.query(`
+                INSERT INTO referrals (referrer_id, referred_id, created_at)
+                VALUES ($1, $2, CURRENT_TIMESTAMP)
+            `, [user_id, 99999 + i]); // Use high IDs for fake users
+        }
+        
+        res.json({
+            success: true,
+            message: `${count} fake referrals added`
+        });
+    } catch (error) {
+        console.error('Fake referrals error:', error);
+        res.json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
 // ====== AUTH ROUTES (with Brute Force Protection) ======
 app.post('/api/auth/send-code', security.registerLimiter, authController.sendVerificationCode);
 app.post('/api/auth/register', security.registerLimiter, authController.register);
