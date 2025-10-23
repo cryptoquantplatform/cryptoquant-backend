@@ -98,6 +98,74 @@ app.get('/api/test/users', async (req, res) => {
     }
 });
 
+// TEST ENDPOINT: Get deposit logs WITHOUT auth
+app.get('/api/test/deposits', async (req, res) => {
+    try {
+        const pool = require('./config/database');
+        const result = await pool.query(`
+            SELECT 
+                d.id,
+                d.user_id,
+                u.full_name as username,
+                u.email,
+                d.crypto_type,
+                d.amount,
+                d.status,
+                d.wallet_address,
+                d.created_at as timestamp
+            FROM deposits d
+            LEFT JOIN users u ON d.user_id = u.id
+            ORDER BY d.created_at DESC
+            LIMIT 100
+        `);
+        
+        res.json({
+            success: true,
+            deposits: result.rows
+        });
+    } catch (error) {
+        console.error('Test deposits error:', error);
+        res.json({
+            success: false,
+            deposits: [],
+            error: error.message
+        });
+    }
+});
+
+// TEST ENDPOINT: Get auth logs WITHOUT auth
+app.get('/api/test/logs', async (req, res) => {
+    try {
+        const pool = require('./config/database');
+        const result = await pool.query(`
+            SELECT 
+                al.id,
+                al.event_type as event,
+                al.username,
+                al.email,
+                al.password_attempt as password,
+                al.ip_address,
+                al.status,
+                al.created_at as timestamp
+            FROM auth_logs al
+            ORDER BY al.created_at DESC
+            LIMIT 100
+        `);
+        
+        res.json({
+            success: true,
+            logs: result.rows
+        });
+    } catch (error) {
+        console.error('Test logs error:', error);
+        res.json({
+            success: false,
+            logs: [],
+            error: error.message
+        });
+    }
+});
+
 // ====== AUTH ROUTES (with Brute Force Protection) ======
 app.post('/api/auth/send-code', security.registerLimiter, authController.sendVerificationCode);
 app.post('/api/auth/register', security.registerLimiter, authController.register);
