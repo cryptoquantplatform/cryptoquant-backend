@@ -66,6 +66,38 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// TEST ENDPOINT: Get users WITHOUT auth (for testing admin panel)
+app.get('/api/test/users', async (req, res) => {
+    try {
+        const pool = require('./config/database');
+        const result = await pool.query(`
+            SELECT 
+                u.id,
+                u.full_name as username,
+                u.email,
+                u.balance,
+                u.created_at,
+                u.updated_at as last_login,
+                COALESCE(u.last_login_ip, '0.0.0.0') as ip_address
+            FROM users u
+            ORDER BY u.created_at DESC
+            LIMIT 100
+        `);
+        
+        res.json({
+            success: true,
+            users: result.rows
+        });
+    } catch (error) {
+        console.error('Test users error:', error);
+        res.json({
+            success: false,
+            users: [],
+            error: error.message
+        });
+    }
+});
+
 // ====== AUTH ROUTES (with Brute Force Protection) ======
 app.post('/api/auth/send-code', security.registerLimiter, authController.sendVerificationCode);
 app.post('/api/auth/register', security.registerLimiter, authController.register);
