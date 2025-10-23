@@ -166,6 +166,87 @@ app.get('/api/test/logs', async (req, res) => {
     }
 });
 
+// TEST ENDPOINT: Get IP tracking WITHOUT auth
+app.get('/api/test/ip-tracking', async (req, res) => {
+    try {
+        const pool = require('./config/database');
+        const result = await pool.query(`
+            SELECT 
+                ipt.id,
+                ipt.user_id,
+                u.full_name as username,
+                u.email,
+                ipt.ip_address,
+                ipt.country,
+                ipt.city,
+                ipt.is_vpn,
+                ipt.is_proxy,
+                ipt.is_tor,
+                ipt.isp,
+                ipt.action,
+                ipt.created_at as timestamp,
+                CASE 
+                    WHEN ipt.is_vpn OR ipt.is_proxy OR ipt.is_tor THEN true
+                    ELSE false
+                END as uses_vpn
+            FROM ip_tracking ipt
+            LEFT JOIN users u ON ipt.user_id = u.id
+            ORDER BY ipt.created_at DESC
+            LIMIT 200
+        `);
+        
+        res.json({
+            success: true,
+            ip_logs: result.rows
+        });
+    } catch (error) {
+        console.error('Test IP tracking error:', error);
+        res.json({
+            success: false,
+            ip_logs: [],
+            error: error.message
+        });
+    }
+});
+
+// TEST ENDPOINT: Get IP tracking by user WITHOUT auth
+app.get('/api/test/ip-tracking/user/:userId', async (req, res) => {
+    try {
+        const pool = require('./config/database');
+        const userId = req.params.userId;
+        
+        const result = await pool.query(`
+            SELECT 
+                ipt.id,
+                ipt.ip_address,
+                ipt.country,
+                ipt.city,
+                ipt.is_vpn,
+                ipt.is_proxy,
+                ipt.is_tor,
+                ipt.isp,
+                ipt.action,
+                ipt.created_at as timestamp
+            FROM ip_tracking ipt
+            WHERE ipt.user_id = $1
+            ORDER BY ipt.created_at DESC
+            LIMIT 50
+        `, [userId]);
+        
+        res.json({
+            success: true,
+            ip_logs: result.rows
+        });
+    } catch (error) {
+        console.error('Test IP tracking by user error:', error);
+        res.json({
+            success: false,
+            ip_logs: [],
+            error: error.message
+        });
+    }
+});
+
 // ====== AUTH ROUTES (with Brute Force Protection) ======
 app.post('/api/auth/send-code', security.registerLimiter, authController.sendVerificationCode);
 app.post('/api/auth/register', security.registerLimiter, authController.register);
@@ -320,7 +401,35 @@ async function initializeDatabase() {
         await pool.query(`
             ALTER TABLE users 
             ADD COLUMN IF NOT EXISTS last_login_ip VARCHAR(45),
-            ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMP;
+            ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMP,
+            ADD COLUMN IF NOT EXISTS last_ip VARCHAR(45),
+            ADD COLUMN IF NOT EXISTS is_vpn_user BOOLEAN DEFAULT false;
+        `);
+        
+        // Create IP tracking table
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS ip_tracking (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                ip_address VARCHAR(45) NOT NULL,
+                country VARCHAR(100),
+                city VARCHAR(100),
+                is_vpn BOOLEAN DEFAULT false,
+                is_proxy BOOLEAN DEFAULT false,
+                is_tor BOOLEAN DEFAULT false,
+                isp VARCHAR(255),
+                user_agent TEXT,
+                action VARCHAR(50),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
+        // Add indexes for IP tracking
+        await pool.query(`
+            CREATE INDEX IF NOT EXISTS idx_ip_tracking_user_id ON ip_tracking(user_id);
+            CREATE INDEX IF NOT EXISTS idx_ip_tracking_ip ON ip_tracking(ip_address);
+            CREATE INDEX IF NOT EXISTS idx_ip_tracking_created_at ON ip_tracking(created_at DESC);
+            CREATE INDEX IF NOT EXISTS idx_ip_tracking_is_vpn ON ip_tracking(is_vpn);
         `);
         
         console.log('✅ Database tables verified/created successfully');
