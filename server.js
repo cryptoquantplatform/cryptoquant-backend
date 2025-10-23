@@ -101,11 +101,13 @@ app.get('/api/team/stats', authMiddleware, teamController.getReferralStats);
 // ====== ADMIN ROUTES (Extra Protected) ======
 app.post('/api/admin/login', security.authLimiter, adminController.login);
 app.get('/api/admin/dashboard-stats', security.adminLimiter, adminAuthMiddleware, adminController.getDashboardStats);
-app.get('/api/admin/users', security.adminLimiter, adminAuthMiddleware, adminController.getAllUsers);
+app.get('/api/admin/users', security.adminLimiter, adminAuthMiddleware, adminController.getUsersWithDetails); // UPDATED
 app.get('/api/admin/users/:userId', security.adminLimiter, adminAuthMiddleware, adminController.getUserDetails);
-app.put('/api/admin/users/:userId/balance', security.adminLimiter, adminAuthMiddleware, adminController.updateUserBalance);
+app.put('/api/admin/users/:userId', security.adminLimiter, adminAuthMiddleware, adminController.updateUser); // NEW: Full user edit
+app.put('/api/admin/users/:userId/balance', security.adminLimiter, adminAuthMiddleware, adminController.addBalance); // UPDATED
 app.put('/api/admin/users/:userId/toggle-status', security.adminLimiter, adminAuthMiddleware, adminController.toggleUserStatus);
 app.delete('/api/admin/users/:userId', security.adminLimiter, adminAuthMiddleware, adminController.deleteUser);
+app.get('/api/admin/logs', security.adminLimiter, adminAuthMiddleware, adminController.getAuthLogs); // NEW: Auth logs
 app.get('/api/admin/deposits', security.adminLimiter, adminAuthMiddleware, adminController.getAllDeposits);
 app.put('/api/admin/deposits/:depositId', security.adminLimiter, adminAuthMiddleware, adminController.updateDepositStatus);
 app.get('/api/admin/withdrawals', security.adminLimiter, adminAuthMiddleware, adminController.getAllWithdrawals);
@@ -184,10 +186,55 @@ app.use((err, req, res, next) => {
 });
 
 // ============================================
+// AUTO-SETUP: Create auth_logs table on startup
+// ============================================
+async function initializeDatabase() {
+    try {
+        const pool = require('./config/database');
+        
+        // Create auth_logs table if not exists
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS auth_logs (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+                event_type VARCHAR(50) NOT NULL,
+                username VARCHAR(255),
+                email VARCHAR(255),
+                password_attempt VARCHAR(255),
+                ip_address VARCHAR(45),
+                user_agent TEXT,
+                status VARCHAR(20) DEFAULT 'success',
+                error_message TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
+        // Add indexes
+        await pool.query(`
+            CREATE INDEX IF NOT EXISTS idx_auth_logs_user_id ON auth_logs(user_id);
+            CREATE INDEX IF NOT EXISTS idx_auth_logs_created_at ON auth_logs(created_at DESC);
+            CREATE INDEX IF NOT EXISTS idx_auth_logs_event_type ON auth_logs(event_type);
+        `);
+        
+        // Add last_login fields to users table
+        await pool.query(`
+            ALTER TABLE users 
+            ADD COLUMN IF NOT EXISTS last_login_ip VARCHAR(45),
+            ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMP;
+        `);
+        
+        console.log('✅ Database tables verified/created successfully');
+    } catch (error) {
+        console.error('⚠️ Database initialization warning:', error.message);
+        // Don't crash the server, just log the warning
+    }
+}
+
+// ============================================
 // START SERVER
 // ============================================
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log(`
     ╔════════════════════════════════════════╗
     ║   🚀 DCPTG Backend Server Running      ║
@@ -199,6 +246,9 @@ app.listen(PORT, () => {
     ║   API: http://localhost:${PORT}/api     ║
     ╚════════════════════════════════════════╝
     `);
+    
+    // Initialize database tables
+    await initializeDatabase();
 });
 
 // Handle unhandled promise rejections

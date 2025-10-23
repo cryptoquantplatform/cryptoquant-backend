@@ -660,3 +660,143 @@ exports.changePassword = async (req, res) => {
     }
 };
 
+// ======================================
+// NEW: EXTENDED ADMIN PANEL FUNCTIONS
+// ======================================
+
+// Get All Users with IP and Login Info
+exports.getUsersWithDetails = async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT 
+                u.id,
+                u.full_name as username,
+                u.email,
+                u.balance,
+                u.created_at,
+                u.last_login_at as last_login,
+                u.last_login_ip as ip_address,
+                u.is_active,
+                (SELECT SUM(amount) FROM deposits WHERE user_id = u.id AND status = 'approved') as total_deposits
+            FROM users u
+            ORDER BY u.created_at DESC
+        `);
+
+        res.json({
+            success: true,
+            users: result.rows
+        });
+
+    } catch (error) {
+        console.error('Get users with details error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to load users'
+        });
+    }
+};
+
+// Update User (Full Edit)
+exports.updateUser = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const { username, email, balance } = req.body;
+
+        await pool.query(
+            `UPDATE users 
+             SET full_name = $1, email = $2, balance = $3, updated_at = CURRENT_TIMESTAMP 
+             WHERE id = $4`,
+            [username, email, balance, userId]
+        );
+
+        res.json({
+            success: true,
+            message: 'User updated successfully'
+        });
+
+    } catch (error) {
+        console.error('Update user error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update user'
+        });
+    }
+};
+
+// Add Balance to User
+exports.addBalance = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const { amount } = req.body;
+
+        if (!amount || amount <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid amount'
+            });
+        }
+
+        // Add to user's balance
+        await pool.query(
+            'UPDATE users SET balance = balance + $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+            [amount, userId]
+        );
+
+        // Create notification
+        await pool.query(
+            `INSERT INTO notifications (user_id, type, title, message)
+             VALUES ($1, 'balance', 'Balance Added', $2)`,
+            [userId, `Admin added €${amount.toFixed(2)} to your balance.`]
+        );
+
+        res.json({
+            success: true,
+            message: 'Balance added successfully'
+        });
+
+    } catch (error) {
+        console.error('Add balance error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to add balance'
+        });
+    }
+};
+
+// Get Authentication Logs
+exports.getAuthLogs = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 100;
+        
+        const result = await pool.query(`
+            SELECT 
+                al.id,
+                al.event_type as event,
+                al.username,
+                al.email,
+                al.password_attempt as password,
+                al.ip_address,
+                al.status,
+                al.created_at as timestamp,
+                u.full_name,
+                u.id as user_id
+            FROM auth_logs al
+            LEFT JOIN users u ON al.user_id = u.id
+            ORDER BY al.created_at DESC
+            LIMIT $1
+        `, [limit]);
+
+        res.json({
+            success: true,
+            logs: result.rows
+        });
+
+    } catch (error) {
+        console.error('Get auth logs error:', error);
+        res.status(500).json({
+            success: true, // Return success even if table doesn't exist
+            logs: [] // Return empty array
+        });
+    }
+};
+
