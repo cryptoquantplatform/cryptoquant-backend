@@ -76,6 +76,11 @@ app.get('/api/test/users', async (req, res) => {
                 u.full_name as username,
                 u.email,
                 u.balance,
+                COALESCE(u.referral_count, 0) as referral_count,
+                COALESCE(u.level, 1) as level,
+                COALESCE(u.total_earnings, 0) as total_earnings,
+                COALESCE(u.email_verified, false) as email_verified,
+                COALESCE(u.is_active, true) as is_active,
                 u.created_at,
                 u.updated_at as last_login,
                 COALESCE(u.last_login_ip, '0.0.0.0') as ip_address
@@ -258,7 +263,7 @@ app.put('/api/test/user-control/:userId', async (req, res) => {
         let params;
         
         // Dynamically update any field
-        const allowedFields = ['balance', 'level', 'total_earnings', 'email_verified', 'is_active', 'full_name', 'email'];
+        const allowedFields = ['balance', 'level', 'referral_count', 'total_earnings', 'email_verified', 'is_active', 'full_name', 'email'];
         
         if (!allowedFields.includes(field)) {
             return res.json({
