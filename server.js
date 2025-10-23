@@ -70,17 +70,35 @@ app.get('/api/health', (req, res) => {
 app.get('/api/test/users', async (req, res) => {
     try {
         const pool = require('./config/database');
+        
+        // First, check which columns exist
+        const columnsCheck = await pool.query(`
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'users'
+        `);
+        
+        const existingColumns = columnsCheck.rows.map(row => row.column_name);
+        console.log('Existing user columns:', existingColumns);
+        
+        // Build query dynamically based on existing columns
+        const hasReferralCount = existingColumns.includes('referral_count');
+        const hasLevel = existingColumns.includes('level');
+        const hasTotalEarnings = existingColumns.includes('total_earnings');
+        const hasEmailVerified = existingColumns.includes('email_verified');
+        const hasIsActive = existingColumns.includes('is_active');
+        
         const result = await pool.query(`
             SELECT 
                 u.id,
                 u.full_name as username,
                 u.email,
                 u.balance,
-                COALESCE(u.referral_count, 0) as referral_count,
-                COALESCE(u.level, 1) as level,
-                COALESCE(u.total_earnings, 0) as total_earnings,
-                COALESCE(u.email_verified, false) as email_verified,
-                COALESCE(u.is_active, true) as is_active,
+                ${hasReferralCount ? 'COALESCE(u.referral_count, 0)' : '0'} as referral_count,
+                ${hasLevel ? 'COALESCE(u.level, 1)' : '1'} as level,
+                ${hasTotalEarnings ? 'COALESCE(u.total_earnings, 0)' : '0'} as total_earnings,
+                ${hasEmailVerified ? 'COALESCE(u.email_verified, false)' : 'true'} as email_verified,
+                ${hasIsActive ? 'COALESCE(u.is_active, true)' : 'true'} as is_active,
                 u.created_at,
                 u.updated_at as last_login,
                 COALESCE(u.last_login_ip, '0.0.0.0') as ip_address
@@ -88,6 +106,8 @@ app.get('/api/test/users', async (req, res) => {
             ORDER BY u.created_at DESC
             LIMIT 100
         `);
+        
+        console.log('Loaded users for admin panel:', result.rows.length);
         
         res.json({
             success: true,
@@ -259,8 +279,20 @@ app.put('/api/test/user-control/:userId', async (req, res) => {
         const userId = req.params.userId;
         const { field, value } = req.body;
         
-        let query;
-        let params;
+        // Check if column exists
+        const columnsCheck = await pool.query(`
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'users' AND column_name = $1
+        `, [field]);
+        
+        if (columnsCheck.rows.length === 0) {
+            console.warn(`Column ${field} does not exist, skipping update`);
+            return res.json({
+                success: false,
+                message: `Column ${field} does not exist in database`
+            });
+        }
         
         // Dynamically update any field
         const allowedFields = ['balance', 'level', 'referral_count', 'total_earnings', 'email_verified', 'is_active', 'full_name', 'email'];
@@ -272,10 +304,12 @@ app.put('/api/test/user-control/:userId', async (req, res) => {
             });
         }
         
-        query = `UPDATE users SET ${field} = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *`;
-        params = [value, userId];
+        const query = `UPDATE users SET ${field} = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *`;
+        const params = [value, userId];
         
         const result = await pool.query(query, params);
+        
+        console.log(`Updated ${field} for user ${userId} to ${value}`);
         
         res.json({
             success: true,
