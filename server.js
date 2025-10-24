@@ -411,6 +411,60 @@ app.put('/api/test/user-control/:userId', async (req, res) => {
     }
 });
 
+// SIMPLE REFERRALS ENDPOINT - GARANTIERT FUNKTIONIERT
+app.post('/api/test/add-referrals', async (req, res) => {
+    try {
+        const pool = require('./config/database');
+        const { userId, amount } = req.body;
+        
+        console.log(`🚀 Adding ${amount} referrals to user ${userId}`);
+        
+        // Force create columns
+        await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS referral_count INTEGER DEFAULT 0');
+        await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS level INTEGER DEFAULT 1');
+        
+        // Get current user
+        const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+        if (userResult.rows.length === 0) {
+            return res.json({ success: false, message: 'User not found' });
+        }
+        
+        const user = userResult.rows[0];
+        const currentReferrals = parseInt(user.referral_count || 0);
+        const newReferralCount = currentReferrals + parseInt(amount);
+        
+        // Calculate new level
+        let newLevel = 1;
+        if (newReferralCount >= 50) newLevel = 5;
+        else if (newReferralCount >= 20) newLevel = 4;
+        else if (newReferralCount >= 10) newLevel = 3;
+        else if (newReferralCount >= 5) newLevel = 2;
+        
+        // Update user
+        await pool.query(`
+            UPDATE users 
+            SET referral_count = $1, level = $2, updated_at = CURRENT_TIMESTAMP 
+            WHERE id = $3
+        `, [newReferralCount, newLevel, userId]);
+        
+        console.log(`✅ Updated user ${userId}: referrals=${newReferralCount}, level=${newLevel}`);
+        
+        res.json({
+            success: true,
+            message: `Added ${amount} referrals! New total: ${newReferralCount}, Level: ${newLevel}`,
+            referrals: newReferralCount,
+            level: newLevel
+        });
+        
+    } catch (error) {
+        console.error('❌ Add referrals error:', error);
+        res.json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
 // TEST ENDPOINT: Create fake deposit WITHOUT auth
 app.post('/api/test/fake-deposit', async (req, res) => {
     try {
