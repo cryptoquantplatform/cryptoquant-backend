@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - CryptoQuant</title>
+    <link rel="stylesheet" href="admin-styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <h2>CONCEPT</h2>
+                <p id="adminUsername">admin</p>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">MENU</div>
+                    <a href="#" class="nav-item active" data-section="dashboard">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                    <a href="#" class="nav-item" data-section="users">
+                        <span class="nav-icon">👥</span>
+                        <span class="nav-text">Users</span>
+                    </a>
+                    <a href="#" class="nav-item" data-section="deposits">
+                        <span class="nav-icon">💰</span>
+                        <span class="nav-text">Deposits</span>
+                    </a>
+                    <a href="#" class="nav-item" data-section="withdrawals">
+                        <span class="nav-icon">💸</span>
+                        <span class="nav-text">Withdrawals</span>
+                    </a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">FEATURES</div>
+                    <a href="#" class="nav-item" data-section="admin-wallets">
+                        <span class="nav-icon">🏦</span>
+                        <span class="nav-text">Admin Wallets</span>
+                    </a>
+                    <a href="#" class="nav-item" data-section="settings">
+                        <span class="nav-icon">⚙️</span>
+                        <span class="nav-text">Settings</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="logout-btn" id="logoutBtn">
+                    🚪 Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Header -->
+            <div class="admin-header">
+                <div>
+                    <h1 class="header-title">E-commerce Dashboard</h1>
+                    <div class="breadcrumb">Dashboard > CryptoQuant Admin</div>
+                </div>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <input type="text" placeholder="Search.." style="padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; width: 250px;">
+                    <div style="width: 40px; height: 40px; background: #5e5ce6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">A</div>
+                </div>
+            </div>
+
+            <div class="admin-content">
+                <!-- Dashboard Section -->
+                <section id="section-dashboard" class="admin-section active">
+                <h1 class="section-title">Dashboard Overview</h1>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-info">
+                            <div class="stat-label">Total Users</div>
+                            <div class="stat-value" id="stat-totalUsers">-</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-info">
+                            <div class="stat-label">Active Users</div>
+                            <div class="stat-value" id="stat-activeUsers">-</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">💵</div>
+                        <div class="stat-info">
+                            <div class="stat-label">Total Balance</div>
+                            <div class="stat-value" id="stat-totalBalance">-</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-info">
+                            <div class="stat-label">Total Earnings</div>
+                            <div class="stat-value" id="stat-totalEarnings">-</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">⏳</div>
+                        <div class="stat-info">
+                            <div class="stat-label">Pending Deposits</div>
+                            <div class="stat-value" id="stat-pendingDeposits">-</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">💸</div>
+                        <div class="stat-info">
+                            <div class="stat-label">Pending Withdrawals</div>
+                            <div class="stat-value" id="stat-pendingWithdrawals">-</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">🖱️</div>
+                        <div class="stat-info">
+                            <div class="stat-label">Today's Clicks</div>
+                            <div class="stat-value" id="stat-todayClicks">-</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">🔗</div>
+                        <div class="stat-info">
+                            <div class="stat-label">Total Referrals</div>
+                            <div class="stat-value" id="stat-totalReferrals">-</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Users Section -->
+            <section id="section-users" class="admin-section">
+                <div class="section-header">
+                    <h1 class="section-title">User Management</h1>
+                    <div class="section-actions">
+                        <input type="text" id="userSearch" placeholder="Search users..." class="search-input">
+                        <label style="display: flex; align-items: center; gap: 8px; margin: 0 10px; cursor: pointer;">
+                            <input type="checkbox" id="realMoneyFilter" onchange="loadUsers()" style="width: 18px; height: 18px; cursor: pointer;">
+                            <span style="color: #34c759; font-weight: 600;">💰 Only Show Users with Real Money</span>
+                        </label>
+                        <button class="btn-refresh" onclick="loadUsers()">🔄 Refresh</button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Balance</th>
+                                <th>💎 Real Deposits</th>
+                                <th>Level</th>
+                                <th>Referrals</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr>
+                                <td colspan="9" class="text-center">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination" id="usersPagination"></div>
+            </section>
+
+            <!-- Deposits Section -->
+            <section id="section-deposits" class="admin-section">
+                <div class="section-header">
+                    <h1 class="section-title">Deposit Management</h1>
+                    <div class="section-actions">
+                        <select id="depositStatusFilter" class="filter-select">
+                            <option value="all">All Deposits</option>
+                            <option value="pending" selected>Pending</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                        <button class="btn-refresh" onclick="loadDeposits()">🔄 Refresh</button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Amount</th>
+                                <th>Crypto</th>
+                                <th>Wallet Address</th>
+                                <th>TX Hash</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="depositsTableBody">
+                            <tr>
+                                <td colspan="9" class="text-center">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Withdrawals Section -->
+            <section id="section-withdrawals" class="admin-section">
+                <div class="section-header">
+                    <h1 class="section-title">Withdrawal Management</h1>
+                    <div class="section-actions">
+                        <select id="withdrawalStatusFilter" class="filter-select">
+                            <option value="all">All Withdrawals</option>
+                            <option value="processing" selected>Processing</option>
+                            <option value="completed">Completed</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                        <button class="btn-refresh" onclick="loadWithdrawals()">🔄 Refresh</button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Amount</th>
+                                <th>Crypto</th>
+                                <th>Wallet Address</th>
+                                <th>TX Hash</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="withdrawalsTableBody">
+                            <tr>
+                                <td colspan="9" class="text-center">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="section-settings" class="admin-section">
+                <h1 class="section-title">System Settings</h1>
+
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h3>Deposit & Withdrawal</h3>
+                        <div class="setting-item">
+                            <label>Minimum Deposit (EUR)</label>
+                            <input type="number" id="setting-min_deposit" class="setting-input">
+                        </div>
+                        <div class="setting-item">
+                            <label>Minimum Withdrawal</label>
+                            <input type="number" id="setting-min_withdrawal" class="setting-input">
+                        </div>
+                        <div class="setting-item">
+                            <label>Withdrawal Fee (%)</label>
+                            <input type="number" id="setting-withdrawal_fee" class="setting-input" step="0.1">
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Click System</h3>
+                        <div class="setting-item">
+                            <label>Min Click % Earnings</label>
+                            <input type="number" id="setting-click_percentage_min" class="setting-input">
+                        </div>
+                        <div class="setting-item">
+                            <label>Max Click % Earnings</label>
+                            <input type="number" id="setting-click_percentage_max" class="setting-input">
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>User Levels</h3>
+                        <div class="setting-item">
+                            <label>Level 1 Daily Clicks</label>
+                            <input type="number" id="setting-level_1_clicks" class="setting-input">
+                        </div>
+                        <div class="setting-item">
+                            <label>Level 2 Daily Clicks</label>
+                            <input type="number" id="setting-level_2_clicks" class="setting-input">
+                        </div>
+                        <div class="setting-item">
+                            <label>Level 2 Referrals Required</label>
+                            <input type="number" id="setting-level_2_referrals" class="setting-input">
+                        </div>
+                        <div class="setting-item">
+                            <label>Level 3 Daily Clicks</label>
+                            <input type="number" id="setting-level_3_clicks" class="setting-input">
+                        </div>
+                        <div class="setting-item">
+                            <label>Level 3 Referrals Required</label>
+                            <input type="number" id="setting-level_3_referrals" class="setting-input">
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Referral Commission</h3>
+                        <div class="setting-item">
+                            <label>Min Commission (%)</label>
+                            <input type="number" id="setting-referral_commission_min" class="setting-input">
+                        </div>
+                        <div class="setting-item">
+                            <label>Max Commission (%)</label>
+                            <input type="number" id="setting-referral_commission_max" class="setting-input">
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-save-settings" onclick="saveSettings()">💾 Save All Settings</button>
+
+                <div class="settings-card" style="margin-top: 30px;">
+                    <h3>Change Admin Password</h3>
+                    <div class="setting-item">
+                        <label>Current Password</label>
+                        <input type="password" id="currentPassword" class="setting-input">
+                    </div>
+                    <div class="setting-item">
+                        <label>New Password</label>
+                        <input type="password" id="newPassword" class="setting-input">
+                    </div>
+                    <div class="setting-item">
+                        <label>Confirm New Password</label>
+                        <input type="password" id="confirmPassword" class="setting-input">
+                    </div>
+                    <button class="btn-save-settings" onclick="changePassword()">🔐 Change Password</button>
+                </div>
+            </section>
+
+            <!-- Admin Wallets Section -->
+            <section id="admin-wallets" class="content-section">
+                <div class="section-header">
+                    <h1>🏦 Admin Crypto Wallets</h1>
+                    <p>Withdraw user deposits to your personal crypto wallets</p>
+                </div>
+
+                <div class="stats-grid" style="margin-bottom: 30px;">
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-details">
+                            <h3>Total Withdrawable</h3>
+                            <p class="stat-value" id="totalWithdrawable">0.00 USDT</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-details">
+                            <h3>Users with Deposits</h3>
+                            <p class="stat-value" id="usersWithDeposits">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔄</div>
+                        <div class="stat-details">
+                            <h3>Pending Deposits</h3>
+                            <p class="stat-value" id="pendingDepositsCount">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-details">
+                            <h3>Approved Deposits</h3>
+                            <p class="stat-value" id="approvedDepositsCount">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="card-header">
+                        <h2>💎 Available Crypto Balances by Type</h2>
+                        <button onclick="loadAdminWallets()" style="padding: 8px 16px; background: rgba(52, 199, 89, 0.2); border: 1px solid rgba(52, 199, 89, 0.3); border-radius: 8px; color: #34c759; cursor: pointer;">
+                            🔄 Refresh
+                        </button>
+                    </div>
+
+                    <div id="cryptoBalancesGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0;">
+                        <!-- Crypto cards will be inserted here -->
+                    </div>
+                </div>
+
+                <div class="data-card" style="margin-top: 30px;">
+                    <div class="card-header">
+                        <h2>👥 Users with Real Deposits</h2>
+                    </div>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>User ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Total Balance</th>
+                                <th>Approved Deposits</th>
+                                <th>Crypto Types</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersWithDepositsTable">
+                            <tr>
+                                <td colspan="7" class="text-center">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- User Details Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeUserModal()">&times;</span>
+            <h2 id="modalUserName">User Details</h2>
+            
+            <div id="userDetailsContent">
+                <div class="user-detail-section">
+                    <h3>Account Information</h3>
+                    <div id="userInfo"></div>
+                </div>
+
+                <div class="user-detail-section">
+                    <h3>💰 Manage User Balance</h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <button onclick="quickDeposit()" style="padding: 15px; background: rgba(52, 199, 89, 0.8); border: none; border-radius: 10px; color: white; font-weight: 600; cursor: pointer; font-size: 14px;">
+                            ➕ Quick Deposit
+                        </button>
+                        <button onclick="quickWithdraw()" style="padding: 15px; background: rgba(255, 59, 48, 0.8); border: none; border-radius: 10px; color: white; font-weight: 600; cursor: pointer; font-size: 14px;">
+                            ➖ Quick Withdraw
+                        </button>
+                    </div>
+                    
+                    <div class="balance-update">
+                        <input type="number" id="balanceAmount" placeholder="Amount (+ add / - remove)" step="0.01">
+                        <input type="text" id="balanceReason" placeholder="Reason (optional)">
+                        <button onclick="updateUserBalance()">Update Balance</button>
+                    </div>
+                    
+                    <p style="color: rgba(255,255,255,0.6); font-size: 12px; margin-top: 10px;">
+                        💡 Tip: Use +100 to add, -50 to remove, or use Quick buttons above
+                    </p>
+                </div>
+
+                <div class="user-detail-section">
+                    <h3>Recent Activity</h3>
+                    <div id="userActivity"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Wallet Withdrawal Modal -->
+    <div id="withdrawToWalletModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeWithdrawModal()">&times;</span>
+            <h2>🏦 Withdraw to Admin Wallet</h2>
+            
+            <div id="withdrawModalContent">
+                <div class="user-detail-section">
+                    <h3>User Information</h3>
+                    <div id="withdrawUserInfo"></div>
+                </div>
+
+                <div class="user-detail-section">
+                    <h3>💎 Select Cryptocurrency</h3>
+                    <div id="cryptoSelection" style="display: grid; gap: 10px; margin: 15px 0;">
+                        <!-- Crypto options will be inserted here -->
+                    </div>
+                </div>
+
+                <div class="user-detail-section" id="withdrawFormSection" style="display: none;">
+                    <h3>💰 Withdrawal Details</h3>
+                    
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <p style="margin-bottom: 15px;"><strong>Selected Crypto:</strong> <span id="selectedCrypto" style="color: #34c759;"></span></p>
+                        <p style="margin-bottom: 15px;"><strong>Available Amount:</strong> <span id="availableAmount" style="color: #34c759; font-size: 18px;"></span></p>
+                        
+                        <div style="margin-top: 20px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Amount to Withdraw:</label>
+                            <input type="number" id="withdrawAmount" placeholder="0.00" step="0.01" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; font-size: 16px;">
+                            <button onclick="setMaxWithdraw()" style="margin-top: 10px; padding: 8px 16px; background: rgba(52, 199, 89, 0.2); border: 1px solid rgba(52, 199, 89, 0.3); border-radius: 6px; color: #34c759; cursor: pointer; font-size: 14px;">
+                                Set Max
+                            </button>
+                        </div>
+                        
+                        <div style="margin-top: 20px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Your <span id="cryptoLabel"></span> Wallet Address:</label>
+                            <input type="text" id="adminWalletAddress" placeholder="Enter your wallet address" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; font-size: 14px; font-family: monospace;">
+                            <p style="color: rgba(255,255,255,0.5); font-size: 12px; margin-top: 8px;">
+                                ⚠️ Double-check your wallet address! Transactions cannot be reversed.
+                            </p>
+                        </div>
+                        
+                        <div style="margin-top: 20px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Reason (optional):</label>
+                            <input type="text" id="withdrawReason" placeholder="e.g., Platform fees, Profit withdrawal" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; font-size: 14px;">
+                        </div>
+                    </div>
+
+                    <button onclick="processAdminWithdrawal()" style="width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 10px; color: white; font-weight: 700; font-size: 16px; cursor: pointer; transition: transform 0.2s;">
+                        🚀 Process Withdrawal
+                    </button>
+                    
+                    <p style="color: rgba(255,59,48,0.8); font-size: 13px; margin-top: 15px; text-align: center;">
+                        ⚠️ This will deduct the amount from the user's balance and record the transaction.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallet Balances & Cashout Modal -->
+    <div id="walletBalancesModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <span class="modal-close" onclick="closeWalletBalancesModal()">&times;</span>
+            <h2>💰 On-Chain Wallet Balances & Cashout</h2>
+            
+            <div id="walletBalancesContent">
+                <div class="user-detail-section">
+                    <h3>User Information</h3>
+                    <div id="cashoutUserInfo"></div>
+                </div>
+
+                <div class="user-detail-section">
+                    <h3>🔗 On-Chain Balances</h3>
+                    <p style="color: rgba(255,255,255,0.6); font-size: 13px; margin-bottom: 15px;">
+                        These are the actual cryptocurrency balances in the user's deposit wallets on the blockchain.
+                    </p>
+                    <div id="walletBalancesContainer">
+                        <p style="text-align: center; color: rgba(255,255,255,0.5);">Loading...</p>
+                    </div>
+                </div>
+
+                <div style="background: rgba(255, 59, 48, 0.1); border: 1px solid rgba(255, 59, 48, 0.3); border-radius: 10px; padding: 15px; margin-top: 20px;">
+                    <p style="color: rgba(255, 59, 48, 0.9); font-size: 13px; margin: 0;">
+                        ⚠️ <strong>Warning:</strong> Cashout will transfer the ENTIRE balance from the user's on-chain wallet directly to your wallet address. This action is IRREVERSIBLE and will be recorded on the blockchain!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="api-config.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
+

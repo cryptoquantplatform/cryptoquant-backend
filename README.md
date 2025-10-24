@@ -130,3 +130,4 @@ MIT
 ## 🆘 Support
 
 Bei Fragen oder Problemen, öffnen Sie ein Issue auf GitHub!
+

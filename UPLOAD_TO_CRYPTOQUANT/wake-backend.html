@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Aufwecken - CryptoQuant</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        h1 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .emoji { font-size: 4em; margin: 20px 0; }
+        .status {
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .status.loading {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .progress {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.5s;
+        }
+        button {
+            width: 100%;
+            padding: 20px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 0;
+            transition: transform 0.2s;
+        }
+        button:active { transform: scale(0.98); }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #34c759 0%, #28a745 100%);
+            color: white;
+        }
+        .info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 0.9em;
+            color: #004085;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="emoji" id="emoji">💤</div>
+        <h1>Backend Aufwecken</h1>
+        <p style="color: #666; margin-bottom: 20px;">Render.com Server ist eingeschlafen</p>
+
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div id="status" class="status loading">
+            ⏳ Wecke Backend auf...
+        </div>
+
+        <div class="info">
+            <strong>ℹ️ Warum passiert das?</strong><br>
+            Render.com Free Tier schläft nach 15 Minuten Inaktivität. Das Aufwecken dauert 30-60 Sekunden.
+        </div>
+
+        <div id="actions"></div>
+    </div>
+
+    <script>
+        let progress = 0;
+        let attempts = 0;
+        const maxAttempts = 12; // 12 x 5 Sekunden = 60 Sekunden max
+
+        async function wakeBackend() {
+            const statusDiv = document.getElementById('status');
+            const emojiDiv = document.getElementById('emoji');
+            const actionsDiv = document.getElementById('actions');
+            const progressBar = document.getElementById('progressBar');
+
+            try {
+                attempts++;
+                progress = Math.min((attempts / maxAttempts) * 100, 95);
+                progressBar.style.width = progress + '%';
+
+                const response = await fetch('https://cryptoquant-api.onrender.com/api/health', {
+                    method: 'GET',
+                    cache: 'no-cache'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // SUCCESS!
+                    progressBar.style.width = '100%';
+                    emojiDiv.textContent = '✅';
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = '✅ BACKEND IST WACH!';
+
+                    actionsDiv.innerHTML = `
+                        <button class="btn-success" onclick="window.location.href='https://cryptoquant.info/dashboard.html'">
+                            🚀 Zum Dashboard
+                        </button>
+                        <button class="btn-primary" onclick="window.location.href='https://cryptoquant.info/admin-login.html'">
+                            🔐 Zum Admin-Login
+                        </button>
+                        <button class="btn-primary" onclick="window.location.href='https://cryptoquant.info'">
+                            🏠 Zur Startseite
+                        </button>
+                    `;
+                } else {
+                    throw new Error('Backend antwortet nicht korrekt');
+                }
+
+            } catch (error) {
+                if (attempts < maxAttempts) {
+                    // Retry
+                    statusDiv.className = 'status loading';
+                    statusDiv.innerHTML = `⏳ Aufwachen... Versuch ${attempts}/${maxAttempts}<br><small style="font-size: 0.8em;">Bitte warten...</small>`;
+                    
+                    setTimeout(wakeBackend, 5000); // Retry in 5 seconds
+                } else {
+                    // Failed
+                    emojiDiv.textContent = '❌';
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = '❌ Backend antwortet nicht<br><small>Bitte später erneut versuchen</small>';
+                    
+                    actionsDiv.innerHTML = `
+                        <button class="btn-primary" onclick="location.reload()">
+                            🔄 Erneut versuchen
+                        </button>
+                    `;
+                }
+            }
+        }
+
+        // Auto-start
+        window.addEventListener('load', () => {
+            setTimeout(wakeBackend, 1000);
+        });
+    </script>
+</body>
+</html>
+

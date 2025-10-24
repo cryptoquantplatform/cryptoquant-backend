@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test - CryptoQuant</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+            color: white;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-box {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        h1 { color: #34c759; text-align: center; }
+        h2 { color: #5e5ce6; margin-top: 0; }
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: rgba(52, 199, 89, 0.2);
+            border: 2px solid #34c759;
+            color: #34c759;
+        }
+        .error {
+            background: rgba(255, 59, 48, 0.2);
+            border: 2px solid #ff3b30;
+            color: #ff3b30;
+        }
+        .info {
+            background: rgba(94, 92, 230, 0.2);
+            border: 2px solid #5e5ce6;
+            color: #5e5ce6;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .code {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 CryptoQuant API Test</h1>
+    
+    <div class="test-box">
+        <h2>📍 Aktuelle Umgebung</h2>
+        <div class="status info" id="environment">
+            Erkenne Umgebung...
+        </div>
+        <div class="code" id="apiUrl">API-URL wird geladen...</div>
+    </div>
+
+    <div class="test-box">
+        <h2>🌐 Backend Gesundheitscheck</h2>
+        <button onclick="testBackendHealth()">Backend testen</button>
+        <div id="healthResult" style="margin-top: 15px;"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>🔐 Admin Login Test</h2>
+        <button onclick="testAdminLogin()">Admin-Login testen (admin/Admin123!)</button>
+        <div id="loginResult" style="margin-top: 15px;"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>📊 Diagnose</h2>
+        <button onclick="runFullDiagnosis()">Vollständige Diagnose</button>
+        <div id="diagnosisResult" style="margin-top: 15px;"></div>
+    </div>
+
+    <script src="api-config.js"></script>
+    <script>
+        // Zeige aktuelle Umgebung
+        window.addEventListener('load', () => {
+            const hostname = window.location.hostname;
+            const isLocal = hostname === 'localhost' || 
+                           hostname === '127.0.0.1' || 
+                           hostname.includes('192.168');
+            
+            const envDiv = document.getElementById('environment');
+            const urlDiv = document.getElementById('apiUrl');
+            
+            if (isLocal) {
+                envDiv.innerHTML = '💻 LOKALE ENTWICKLUNG';
+                envDiv.className = 'status info';
+            } else {
+                envDiv.innerHTML = '🌍 PRODUKTION (cryptoquant.info)';
+                envDiv.className = 'status success';
+            }
+            
+            urlDiv.innerHTML = `<strong>API-URL:</strong> ${API_URL}`;
+        });
+
+        async function testBackendHealth() {
+            const resultDiv = document.getElementById('healthResult');
+            resultDiv.innerHTML = '<div class="status info">⏳ Teste Backend...</div>';
+            
+            try {
+                const response = await fetch(API_URL + '/health');
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="status success">
+                            ✅ Backend läuft perfekt!<br>
+                            <small>${data.message} - ${new Date(data.timestamp).toLocaleString('de-DE')}</small>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="status error">
+                            ❌ Backend antwortet, aber mit Fehler
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="status error">
+                        ❌ Backend nicht erreichbar!<br>
+                        <small>${error.message}</small><br>
+                        <small>URL: ${API_URL}/health</small>
+                    </div>
+                `;
+            }
+        }
+
+        async function testAdminLogin() {
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.innerHTML = '<div class="status info">⏳ Teste Admin-Login...</div>';
+            
+            try {
+                const response = await fetch(API_URL + '/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        username: 'admin', 
+                        password: 'Admin123!' 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="status success">
+                            ✅ Admin-Login funktioniert!<br>
+                            <small>Token erhalten: ${data.token.substring(0, 30)}...</small><br>
+                            <small>Admin: ${data.admin.username} (${data.admin.email})</small>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="status error">
+                            ❌ Login fehlgeschlagen!<br>
+                            <small>${data.message || 'Unbekannter Fehler'}</small>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="status error">
+                        ❌ Login-Request fehlgeschlagen!<br>
+                        <small>${error.message}</small>
+                    </div>
+                `;
+            }
+        }
+
+        async function runFullDiagnosis() {
+            const resultDiv = document.getElementById('diagnosisResult');
+            resultDiv.innerHTML = '<div class="status info">⏳ Führe vollständige Diagnose durch...</div>';
+            
+            const results = [];
+            
+            // Test 1: Umgebung
+            const hostname = window.location.hostname;
+            const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.includes('192.168');
+            results.push(`✅ Hostname: ${hostname}`);
+            results.push(`✅ Umgebung: ${isLocal ? 'LOKAL' : 'PRODUKTION'}`);
+            results.push(`✅ API-URL: ${API_URL}`);
+            
+            // Test 2: Backend Health
+            try {
+                const health = await fetch(API_URL + '/health');
+                const healthData = await health.json();
+                results.push(`✅ Backend Health: OK (${healthData.message})`);
+            } catch (e) {
+                results.push(`❌ Backend Health: FEHLER (${e.message})`);
+            }
+            
+            // Test 3: CORS
+            try {
+                const corsTest = await fetch(API_URL + '/health', {
+                    method: 'OPTIONS'
+                });
+                results.push(`✅ CORS: OK`);
+            } catch (e) {
+                results.push(`❌ CORS: Möglicherweise blockiert`);
+            }
+            
+            // Test 4: Browser Info
+            results.push(`ℹ️ Browser: ${navigator.userAgent}`);
+            results.push(`ℹ️ Protokoll: ${window.location.protocol}`);
+            
+            const html = results.map(r => {
+                const className = r.startsWith('✅') ? 'success' : 
+                                 r.startsWith('❌') ? 'error' : 'info';
+                return `<div class="status ${className}">${r}</div>`;
+            }).join('');
+            
+            resultDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
+

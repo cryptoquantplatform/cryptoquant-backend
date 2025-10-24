@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload-Anleitung - CryptoQuant</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #764ba2;
+            border-left: 5px solid #667eea;
+            padding-left: 15px;
+            margin-top: 30px;
+        }
+        .alert {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .file-list {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .file-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 2px solid #667eea;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        .step {
+            background: #e7f3ff;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 5px solid #2196F3;
+        }
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-right: 15px;
+        }
+        ul {
+            line-height: 2;
+        }
+        li {
+            margin: 10px 0;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 10px 5px;
+        }
+        .button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        code {
+            background: #f4f4f4;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #c7254e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📤 Upload-Anleitung</h1>
+        <p style="text-align: center; font-size: 1.2em; color: #666;">
+            404-Fehler auf <strong>cryptoquant.info</strong> beheben
+        </p>
+
+        <div class="alert">
+            <strong>⚠️ Problem:</strong> Wenn Sie von Ihrem Handy oder anderen Geräten auf cryptoquant.info zugreifen,
+            zeigen die Seiten 404-Fehler, weil die alten Dateien noch auf <code>localhost</code> zeigen,
+            was vom Handy nicht erreichbar ist.
+        </div>
+
+        <div class="success">
+            <strong>✅ Lösung:</strong> Laden Sie die 2 aktualisierten Dateien auf Ihren Server hoch.
+            Diese erkennen automatisch, ob Sie lokal oder auf cryptoquant.info arbeiten.
+        </div>
+
+        <h2>📁 Diese Dateien hochladen:</h2>
+        <div class="file-list">
+            <div class="file-item">✓ api-config.js (4.34 KB)</div>
+            <div class="file-item">✓ admin.js (40.5 KB)</div>
+        </div>
+
+        <h2>🚀 Schritt-für-Schritt Anleitung:</h2>
+
+        <div class="step">
+            <span class="step-number">1</span>
+            <strong>Mit dem Server verbinden</strong>
+            <ul>
+                <li><strong>Option A:</strong> FTP-Client (FileZilla, WinSCP)</li>
+                <li><strong>Option B:</strong> Hosting Control Panel (cPanel, Plesk)</li>
+                <li><strong>Option C:</strong> GitHub/Git (falls verwendet)</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <span class="step-number">2</span>
+            <strong>Zum Website-Ordner navigieren</strong>
+            <ul>
+                <li>Meist: <code>public_html/</code> oder <code>www/</code></li>
+                <li>Dort wo auch die <code>index.html</code> liegt</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <span class="step-number">3</span>
+            <strong>Dateien hochladen</strong>
+            <ul>
+                <li>Laden Sie <code>api-config.js</code> hoch (überschreiben!)</li>
+                <li>Laden Sie <code>admin.js</code> hoch (überschreiben!)</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <span class="step-number">4</span>
+            <strong>Testen</strong>
+            <ul>
+                <li>Öffnen Sie auf Ihrem <strong>Handy</strong>: <code>https://cryptoquant.info</code></li>
+                <li>Browser-Cache leeren oder Inkognito-Modus nutzen</li>
+                <li>Testen Sie: Dashboard, Admin-Login, Deposit, Withdrawal</li>
+                <li>✅ Keine 404-Fehler mehr!</li>
+            </ul>
+        </div>
+
+        <h2>💡 Detaillierte Upload-Methoden:</h2>
+
+        <h3>📌 Methode 1: FTP-Client (FileZilla)</h3>
+        <ol>
+            <li>Öffnen Sie FileZilla</li>
+            <li>Verbinden Sie sich mit Ihrem Server:
+                <ul>
+                    <li>Host: <code>ftp.cryptoquant.info</code> oder IP-Adresse</li>
+                    <li>Benutzername: Ihr FTP-Benutzername</li>
+                    <li>Passwort: Ihr FTP-Passwort</li>
+                </ul>
+            </li>
+            <li>Links: Navigieren Sie zu diesem Ordner (<code>UPLOAD_TO_CRYPTOQUANT</code>)</li>
+            <li>Rechts: Navigieren Sie zu <code>public_html/</code></li>
+            <li>Ziehen Sie die 2 Dateien von links nach rechts</li>
+            <li>Bestätigen Sie "Überschreiben"</li>
+        </ol>
+
+        <h3>📌 Methode 2: cPanel File Manager</h3>
+        <ol>
+            <li>Melden Sie sich bei cPanel an</li>
+            <li>Klicken Sie auf "File Manager"</li>
+            <li>Navigieren Sie zu <code>public_html/</code></li>
+            <li>Klicken Sie oben auf "Upload"</li>
+            <li>Wählen Sie die 2 Dateien aus</li>
+            <li>Warten Sie, bis der Upload abgeschlossen ist</li>
+        </ol>
+
+        <h3>📌 Methode 3: GitHub/Git</h3>
+        <pre style="background: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto;">
+git add api-config.js admin.js
+git commit -m "Fix 404 error - Auto-detect API URL"
+git push origin main
+</pre>
+
+        <h2>🧪 Nach dem Upload:</h2>
+        <div class="success">
+            <strong>Testen Sie vom Handy:</strong>
+            <ol>
+                <li>Öffnen Sie <code>https://cryptoquant.info</code></li>
+                <li>Gehen Sie zu Dashboard → Sollte laden! ✅</li>
+                <li>Gehen Sie zu Admin-Login → Sollte laden! ✅</li>
+                <li>Öffnen Sie die Test-Seite: <code>https://cryptoquant.info/test-production-api.html</code></li>
+            </ol>
+        </div>
+
+        <h2>❓ Häufige Probleme:</h2>
+
+        <h3>Problem: Immer noch 404 Fehler</h3>
+        <ul>
+            <li>✓ Browser-Cache leeren (Einstellungen → Verlauf löschen)</li>
+            <li>✓ Inkognito-Modus verwenden</li>
+            <li>✓ Prüfen: Wurden die Dateien wirklich hochgeladen?</li>
+            <li>✓ Prüfen: Sind die Dateien im richtigen Ordner?</li>
+        </ul>
+
+        <h3>Problem: Backend antwortet nicht</h3>
+        <ul>
+            <li>✓ Testen Sie: <code>https://cryptoquant-api.onrender.com/api/health</code></li>
+            <li>✓ Render.com Free Tier: Server schläft nach Inaktivität</li>
+            <li>✓ Lösung: URL aufrufen, 1-2 Minuten warten</li>
+        </ul>
+
+        <h2>✅ Checkliste:</h2>
+        <ul style="list-style: none; padding-left: 0;">
+            <li>☐ api-config.js hochgeladen</li>
+            <li>☐ admin.js hochgeladen</li>
+            <li>☐ Dateien sind im richtigen Ordner (public_html/)</li>
+            <li>☐ Browser-Cache geleert</li>
+            <li>☐ Vom Handy getestet</li>
+            <li>☐ Dashboard funktioniert</li>
+            <li>☐ Admin-Login funktioniert</li>
+            <li>☐ Keine 404-Fehler mehr!</li>
+        </ul>
+
+        <div style="text-align: center; margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+            <h3 style="color: #28a745;">🎉 Viel Erfolg!</h3>
+            <p>Nach dem Upload sollten alle 404-Fehler verschwunden sein!</p>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+
+
+

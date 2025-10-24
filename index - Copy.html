@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoQuant - Smart Crypto Investment Platform</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Simple home navbar */
+        .home-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px 20px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .home-navbar-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .home-navbar-logo-icon {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .home-navbar-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .home-navbar-btn {
+            padding: 10px 25px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-login {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .btn-login:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-register {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        body {
+            padding-top: 70px;
+        }
+
+        @media (max-width: 600px) {
+            .home-navbar-buttons {
+                flex-direction: row;
+                gap: 8px;
+            }
+
+            .home-navbar-btn {
+                padding: 8px 18px;
+                font-size: 14px;
+            }
+
+            .home-navbar-logo {
+                font-size: 16px;
+            }
+
+            .home-navbar-logo-icon {
+                width: 30px;
+                height: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Home Navigation -->
+    <nav class="home-navbar">
+        <a href="index.html" class="home-navbar-logo">
+            <div class="home-navbar-logo-icon">CQ</div>
+            <span>CryptoQuant</span>
+        </a>
+        <div class="home-navbar-buttons" id="homeNavButtons">
+            <a href="login.html" class="home-navbar-btn btn-login">Login</a>
+            <a href="register.html" class="home-navbar-btn btn-register">Sign Up</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="header-icons">
+                <div class="icon-item">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 5C13.66 5 15 6.34 15 8C15 9.66 13.66 11 12 11C10.34 11 9 9.66 9 8C9 6.34 10.34 5 12 5ZM12 19.2C9.5 19.2 7.29 17.92 6 15.98C6.03 13.99 10 12.9 12 12.9C13.99 12.9 17.97 13.99 18 15.98C16.71 17.92 14.5 19.2 12 19.2Z" fill="#9CA3AF"/>
+                    </svg>
+                </div>
+                <div class="icon-item">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 22C6.48 22 2 17.52 2 12C2 6.48 6.48 2 12 2C17.52 2 22 6.48 22 12C22 17.52 17.52 22 12 22ZM12 20C16.42 20 20 16.42 20 12C20 7.58 16.42 4 12 4C7.58 4 4 7.58 4 12C4 16.42 7.58 20 12 20ZM13 12H17V14H11V7H13V12Z" fill="#9CA3AF"/>
+                    </svg>
+                </div>
+                <div class="icon-item">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z" fill="#9CA3AF"/>
+                    </svg>
+                </div>
+            </div>
+        </header>
+
+        <!-- Logo and Title Section -->
+        <div class="hero-section">
+            <div class="logo-container">
+                <div class="logo-glow"></div>
+                <div class="logo">
+                    <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
+                        <circle cx="50" cy="50" r="48" stroke="url(#gradient1)" stroke-width="3" fill="#0f172a"/>
+                        <!-- CQ Letters -->
+                        <text x="50" y="62" text-anchor="middle" fill="url(#gradient2)" font-size="42" font-weight="bold" font-family="Arial, sans-serif">CQ</text>
+                        <defs>
+                            <linearGradient id="gradient1" x1="0" y1="0" x2="100" y2="100">
+                                <stop offset="0%" stop-color="#3b82f6"/>
+                                <stop offset="100%" stop-color="#60a5fa"/>
+                            </linearGradient>
+                            <linearGradient id="gradient2" x1="30" y1="25" x2="70" y2="75">
+                                <stop offset="0%" stop-color="#60a5fa"/>
+                                <stop offset="100%" stop-color="#3b82f6"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+            </div>
+            <div class="hero-text">
+                <h1 style="font-size: 32px; font-weight: 700; background: linear-gradient(135deg, #60a5fa, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px; line-height: 1.2;">CryptoQuant</h1>
+                <p style="font-size: 18px; color: #94a3b8; margin-bottom: 8px;">Smart Crypto Investment Platform</p>
+                <p style="font-size: 14px; color: #64748b;">Maximize your earnings with professional technology</p>
+            </div>
+        </div>
+
+        <!-- Welfare Package Banner -->
+        <div class="welfare-banner">
+            <div class="welfare-content">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <rect width="20" height="20" rx="3" fill="#3b82f6"/>
+                    <text x="10" y="15" text-anchor="middle" fill="white" font-size="12" font-weight="bold">CQ</text>
+                </svg>
+                <span class="welfare-text">CryptoQuant Newcomer Bonus Package</span>
+            </div>
+            <button class="invite-btn" onclick="window.location.href='register.html'">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <rect width="16" height="16" rx="2" fill="#3b82f6"/>
+                </svg>
+                <span>Join Now</span>
+            </button>
+            <span class="status-label">Active</span>
+        </div>
+
+        <!-- CryptoQuant Card -->
+        <div class="dcptg-card">
+            <div class="card-header">
+                <div class="card-logo">
+                    <div class="card-icon">CryptoQuant</div>
+                </div>
+                <button class="earn-btn" onclick="window.location.href='register.html'">
+                    Start Earning Today →
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="stats-section">
+            <div class="stat-item">
+                <div class="stat-label" style="font-size: 11px; color: #64748b; margin-bottom: 4px;">Bitcoin (BTC)</div>
+                <div class="stat-value">66,814.56</div>
+                <div class="stat-change positive">+0.59%</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label" style="font-size: 11px; color: #64748b; margin-bottom: 4px;">Ethereum (ETH)</div>
+                <div class="stat-value">3,797.91</div>
+                <div class="stat-change positive">+0.18%</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label" style="font-size: 11px; color: #64748b; margin-bottom: 4px;">Solana (SOL)</div>
+                <div class="stat-value">185.77</div>
+                <div class="stat-change negative">-2.24%</div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="login.html" class="nav-item" style="text-decoration: none; color: inherit;">
+                <div class="nav-icon recharge">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                        <rect width="28" height="28" rx="8" fill="#60a5fa"/>
+                        <path d="M14 7C10.13 7 7 10.13 7 14C7 17.87 10.13 21 14 21C17.87 21 21 17.87 21 14C21 10.13 17.87 7 14 7ZM14 12C14.83 12 15.5 12.67 15.5 13.5C15.5 14.33 14.83 15 14 15C13.17 15 12.5 14.33 12.5 13.5C12.5 12.67 13.17 12 14 12ZM14 19C12.17 19 10.55 18.03 9.68 16.59C9.71 15.08 12.67 14.25 14 14.25C15.32 14.25 18.29 15.08 18.32 16.59C17.45 18.03 15.83 19 14 19Z" fill="white"/>
+                    </svg>
+                </div>
+                <span>Login</span>
+            </a>
+            <a href="register.html" class="nav-item" style="text-decoration: none; color: inherit;">
+                <div class="nav-icon withdraw">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                        <rect width="28" height="28" rx="8" fill="#8b5cf6"/>
+                        <path d="M14 7C10.13 7 7 10.13 7 14C7 17.87 10.13 21 14 21C17.87 21 21 17.87 21 14C21 10.13 17.87 7 14 7ZM17 15H15V17C15 17.55 14.55 18 14 18C13.45 18 13 17.55 13 17V15H11C10.45 15 10 14.55 10 14C10 13.45 10.45 13 11 13H13V11C13 10.45 13.45 10 14 10C14.55 10 15 10.45 15 11V13H17C17.55 13 18 13.45 18 14C18 14.55 17.55 15 17 15Z" fill="white"/>
+                    </svg>
+                </div>
+                <span>Register</span>
+            </a>
+            <a href="about.html" class="nav-item" style="text-decoration: none; color: inherit;">
+                <div class="nav-icon team">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                        <rect width="28" height="28" rx="8" fill="#f59e0b"/>
+                        <path d="M13 9H15V11H13V9ZM13 13H15V19H13V13ZM14 5C9.03 5 5 9.03 5 14C5 18.97 9.03 23 14 23C18.97 23 23 18.97 23 14C23 9.03 18.97 5 14 5ZM14 21C10.13 21 7 17.87 7 14C7 10.13 10.13 7 14 7C17.87 7 21 10.13 21 14C21 17.87 17.87 21 14 21Z" fill="white"/>
+                    </svg>
+                </div>
+                <span>About Us</span>
+            </a>
+            <a href="dashboard.html" class="nav-item" style="text-decoration: none; color: inherit;">
+                <div class="nav-icon task">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                        <rect width="28" height="28" rx="8" fill="#ef4444"/>
+                        <path d="M12 2L2 7V13C2 19.5 6.84 25.54 12 27C17.16 25.54 22 19.5 22 13V7L12 2ZM11 18L7 14L8.41 12.59L11 15.17L15.59 10.58L17 12L11 18Z" fill="white" transform="translate(2, 0) scale(0.85)"/>
+                    </svg>
+                </div>
+                <span>Dashboard</span>
+            </a>
+            <a href="register.html" class="nav-item" style="text-decoration: none; color: inherit;">
+                <div class="nav-icon invite">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                        <rect width="28" height="28" rx="8" fill="#60a5fa"/>
+                        <path d="M14 10V18M10 14H18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <span>Get Started</span>
+            </a>
+        </nav>
+    </div>
+
+    <script src="api-config.js"></script>
+    <script>
+        // Check if user is logged in (using api.getToken() for consistent check)
+        document.addEventListener('DOMContentLoaded', function() {
+            const navButtons = document.getElementById('homeNavButtons');
+            
+            if (api.isAuthenticated()) {
+                // User is logged in - show Dashboard button instead of Login/Register
+                navButtons.innerHTML = `
+                    <a href="dashboard.html" class="home-navbar-btn btn-register" style="display: flex; align-items: center; gap: 8px;">
+                        <span>📊</span>
+                        <span>Go to Dashboard</span>
+                    </a>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

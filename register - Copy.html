@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - CryptoQuant</title>
+    <link rel="stylesheet" href="auth-styles.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="logo-section">
+                <div class="logo-glow"></div>
+                <div class="logo">
+                    <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+                        <circle cx="40" cy="40" r="38" stroke="url(#gradient1)" stroke-width="2" fill="#1a1f3a"/>
+                        <path d="M30 25H35C42 25 47 30 47 37C47 44 42 49 35 49H30V25Z" fill="url(#gradient2)"/>
+                        <rect x="30" y="42" width="12" height="4" fill="url(#gradient2)"/>
+                        <rect x="30" y="48" width="12" height="4" fill="url(#gradient2)"/>
+                        <rect x="30" y="54" width="17" height="3" fill="url(#gradient2)"/>
+                        <defs>
+                            <linearGradient id="gradient1" x1="0" y1="0" x2="80" y2="80">
+                                <stop offset="0%" stop-color="#3b82f6"/>
+                                <stop offset="100%" stop-color="#60a5fa"/>
+                            </linearGradient>
+                            <linearGradient id="gradient2" x1="30" y1="25" x2="50" y2="55">
+                                <stop offset="0%" stop-color="#60a5fa"/>
+                                <stop offset="100%" stop-color="#3b82f6"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <h1>CryptoQuant</h1>
+                <p>Smart Crypto Investment Platform</p>
+            </div>
+
+            <form class="auth-form" id="registerForm">
+                <h2>Create Your Account</h2>
+                
+                <div class="form-group">
+                    <label for="fullname">Full Name</label>
+                    <input type="text" id="fullname" name="fullname" required placeholder="Enter your full name">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter your email">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Create a password" minlength="8">
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Confirm your password">
+                </div>
+
+                <div class="form-group">
+                    <label for="referralCode">Referral Code (Optional)</label>
+                    <input type="text" id="referralCode" name="referralCode" placeholder="Enter referral code if you have one">
+                </div>
+
+                <div class="form-options">
+                    <label class="checkbox">
+                        <input type="checkbox" name="terms" required>
+                        <span>I agree to the <a href="#" class="terms-link">Terms & Conditions</a></span>
+                    </label>
+                </div>
+
+                <button type="button" class="submit-btn" id="sendCodeBtn">Send Verification Code</button>
+
+                <!-- Verification Section (hidden by default) -->
+                <div id="verificationSection" style="display: none; margin-top: 20px;">
+                    <div class="form-group">
+                        <label for="verificationCode">Email Verification Code</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="verificationCode" placeholder="Enter 6-digit code" maxlength="6" style="flex: 1;">
+                            <button type="button" class="resend-btn" id="resendCodeBtn">Resend</button>
+                        </div>
+                        <p class="input-note" id="codeNote" style="color: #60a5fa; margin-top: 8px;">Code sent to your email!</p>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="verifyAndRegisterBtn">Verify & Create Account</button>
+                </div>
+
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+
+                <p class="switch-auth">
+                    Already have an account? <a href="login.html">Login here</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <script src="api-config.js"></script>
+    <script src="auth.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - CryptoQuant</title>
+    <link rel="stylesheet" href="dashboard-styles.css">
+    <link rel="stylesheet" href="dashboard-banner.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="header-left">
+                <a href="index.html" class="logo-small" style="text-decoration: none;">CryptoQuant</a>
+                <div class="user-info">
+                    <span class="welcome-text">Welcome back,</span>
+                    <span class="username" id="username">...</span>
+                </div>
+            </div>
+            
+            <!-- Navigation Links -->
+            <nav class="header-nav">
+                <a href="dashboard.html" class="header-nav-link">📊 Dashboard</a>
+                <a href="quantification.html" class="header-nav-link">💎 Quantification</a>
+                <a href="deposit.html" class="header-nav-link">💰 Deposit</a>
+                <a href="withdraw.html" class="header-nav-link">💸 Withdraw</a>
+                <a href="team.html" class="header-nav-link">👥 Team</a>
+                <a href="about.html" class="header-nav-link">ℹ️ About</a>
+            </nav>
+            
+            <div class="header-right">
+                <div class="level-badge" id="levelBadge">
+                    <span class="level-icon">⭐</span>
+                    <span class="level-text">Level <span id="userLevel">1</span></span>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </header>
+
+        <!-- Main Balance Card -->
+        <div class="balance-card">
+            <div class="balance-header">
+                <div>
+                    <p class="balance-label">Total Balance</p>
+                    <h1 class="balance-amount" id="totalBalance">0.00</h1>
+                    <p class="balance-usd">USD</p>
+                </div>
+                <div class="balance-icon">
+                    <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+                        <circle cx="30" cy="30" r="28" stroke="url(#balanceGradient)" stroke-width="2" fill="rgba(59, 130, 246, 0.1)"/>
+                        <text x="30" y="37" text-anchor="middle" fill="#60a5fa" font-size="24" font-weight="bold">$</text>
+                        <defs>
+                            <linearGradient id="balanceGradient" x1="0" y1="0" x2="60" y2="60">
+                                <stop offset="0%" stop-color="#3b82f6"/>
+                                <stop offset="100%" stop-color="#60a5fa"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+            </div>
+            
+            <div class="balance-stats">
+                <div class="stat">
+                    <span class="stat-label">Today's Earnings</span>
+                    <span class="stat-value positive" id="todayEarnings">+0.00 USD</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Total Earnings</span>
+                    <span class="stat-value" id="totalEarnings">0.00 USD</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quantification Quick Access -->
+        <div class="quantification-banner">
+            <div class="banner-content">
+                <div class="banner-icon">📊</div>
+                <div>
+                    <h3>Quantification - Daily Earnings</h3>
+                    <p>Click daily to earn 5-8% returns on your balance</p>
+                </div>
+            </div>
+            <a href="quantification.html" class="banner-btn">Go to Quantification →</a>
+        </div>
+
+        <!-- Referral Stats -->
+        <div class="referral-stats">
+            <h3>Your Referral Stats</h3>
+            <div class="referral-grid">
+                <div class="referral-item">
+                    <div class="referral-icon">👥</div>
+                    <div class="referral-info">
+                        <span class="referral-value" id="totalReferrals">0</span>
+                        <span class="referral-label">Total Referrals</span>
+                    </div>
+                </div>
+                <div class="referral-item">
+                    <div class="referral-icon">📈</div>
+                    <div class="referral-info">
+                        <span class="referral-value" id="bonusPercentage">5%</span>
+                        <span class="referral-label">Bonus Rate</span>
+                    </div>
+                </div>
+                <div class="referral-item">
+                    <div class="referral-icon">🎯</div>
+                    <div class="referral-info">
+                        <span class="referral-value" id="nextLevelProgress">0/5</span>
+                        <span class="referral-label">Next Level</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="referral-link-section">
+                <p class="referral-link-label">Your Referral Link</p>
+                <div class="referral-link-box">
+                    <input type="text" readonly id="referralLink" value="https://dcptg.com/ref/YOURCODE">
+                    <button class="copy-btn" onclick="copyReferralLink()">Copy</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="deposit.html" class="action-card deposit">
+                <div class="action-icon">💳</div>
+                <div class="action-content">
+                    <h4>Deposit</h4>
+                    <p>Add crypto to your balance</p>
+                </div>
+            </a>
+            <a href="withdraw.html" class="action-card withdraw">
+                <div class="action-icon">💸</div>
+                <div class="action-content">
+                    <h4>Withdraw</h4>
+                    <p>Cash out your earnings</p>
+                </div>
+            </a>
+            <a href="team.html" class="action-card team">
+                <div class="action-icon">👥</div>
+                <div class="action-content">
+                    <h4>My Team</h4>
+                    <p>View your referrals</p>
+                </div>
+            </a>
+            <a href="about.html" class="action-card about">
+                <div class="action-icon">ℹ️</div>
+                <div class="action-content">
+                    <h4>About</h4>
+                    <p>Learn about CryptoQuant</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- Level Progress -->
+        <div class="level-progress-section">
+            <h3>Level Progress</h3>
+            <div class="level-info">
+                <div class="level-details">
+                    <span class="current-level">Level <span id="currentLevel">1</span></span>
+                    <span class="level-perks">3 clicks/day • 5% base rate</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="levelProgress" style="width: 0%"></div>
+                </div>
+                <p class="progress-text">Invite <span id="referralsNeeded">5</span> more people to reach Level 2</p>
+            </div>
+
+            <div class="level-benefits">
+                <div class="benefit-card">
+                    <h4>Level 1</h4>
+                    <ul>
+                        <li>3 clicks per day</li>
+                        <li>5% base rate</li>
+                        <li>0 referrals needed</li>
+                    </ul>
+                </div>
+                <div class="benefit-card highlight">
+                    <h4>Level 2</h4>
+                    <ul>
+                        <li>5 clicks per day</li>
+                        <li>8% base rate</li>
+                        <li>5 referrals needed</li>
+                    </ul>
+                </div>
+                <div class="benefit-card">
+                    <h4>Level 3</h4>
+                    <ul>
+                        <li>7 clicks per day</li>
+                        <li>10% base rate</li>
+                        <li>10 referrals needed</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="api-config.js"></script>
+    <script src="dashboard.js"></script>
+    <script src="notifications.js"></script>
+</body>
+</html>
+

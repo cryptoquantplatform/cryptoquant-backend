@@ -1,0 +1,329 @@
+/* Quantification Page Styles */
+
+/* Import base styles */
+@import url('pages-styles.css');
+
+/* Statistics Card Container */
+.stats-card-container {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    margin-bottom: 30px;
+}
+
+/* Modern Statistics Grid */
+.stats-grid-modern {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+}
+
+.stat-item {
+    padding: 24px;
+    text-align: center;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s;
+}
+
+.stat-item:nth-child(3n) {
+    border-right: none;
+}
+
+.stat-item:nth-last-child(-n+3) {
+    border-bottom: none;
+}
+
+.stat-item:hover {
+    background: rgba(59, 130, 246, 0.15);
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: #94a3b8;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.stat-divider {
+    display: none;
+}
+
+/* Click Card */
+.click-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.click-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.click-subtitle {
+    color: #94a3b8;
+    margin-top: 8px;
+}
+
+.clicks-badge {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-radius: 16px;
+    padding: 20px 30px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+}
+
+.clicks-number {
+    font-size: 42px;
+    font-weight: 700;
+    color: white;
+    line-height: 1;
+}
+
+.clicks-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.9);
+    margin-top: 4px;
+    font-weight: 600;
+}
+
+.click-info {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.info-value {
+    color: white;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.info-value.success {
+    color: #10b981;
+}
+
+.earn-btn-large {
+    width: 100%;
+    padding: 24px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    border-radius: 16px;
+    color: white;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.earn-btn-large:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 35px rgba(16, 185, 129, 0.5);
+}
+
+.earn-btn-large:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+}
+
+.btn-icon {
+    font-size: 28px;
+}
+
+.reset-info {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.reset-info span {
+    color: #60a5fa;
+    font-weight: 600;
+}
+
+.click-history {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.history-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.history-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.history-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.history-details h4 {
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+
+.history-details p {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.history-amount {
+    font-size: 18px;
+    font-weight: 700;
+    color: #10b981;
+}
+
+.no-data {
+    text-align: center;
+    color: #64748b;
+    padding: 40px 20px;
+    font-size: 15px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stats-grid-modern {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .stat-item:nth-child(3n) {
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .stat-item:nth-child(2n) {
+        border-right: none;
+    }
+    
+    .stat-item {
+        padding: 20px 16px;
+    }
+    
+    .stat-value {
+        font-size: 28px;
+    }
+    
+    .stat-label {
+        font-size: 12px;
+    }
+    
+    .click-header {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+    
+    .earn-btn-large {
+        font-size: 18px;
+        padding: 20px;
+    }
+    
+    .clicks-number {
+        font-size: 36px;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid-modern {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-item {
+        border-right: none !important;
+    }
+    
+    .stat-item:not(:last-child) {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Quantification Tab Styles */
+.quant-tab {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.quant-tab:hover {
+    color: #e2e8f0;
+}
+
+.quant-tab.active {
+    color: #667eea;
+    border-bottom-color: #667eea;
+}
+
+/* TradingView Charts Styles */
+.chart-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+
+.chart-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 35px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    z-index: 10;
+    pointer-events: none;
+}
+

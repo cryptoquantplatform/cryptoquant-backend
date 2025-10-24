@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantification - CryptoQuant</title>
+    <link rel="stylesheet" href="quantification-styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <div class="header-top">
+                <div class="header-logo-section">
+                    <a href="index.html" class="page-logo">CryptoQuant</a>
+                    <div>
+                        <h1>Quantification</h1>
+                        <p class="page-subtitle">Manage your daily earnings and track your statistics</p>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+            
+            <!-- Navigation Links -->
+            <nav class="page-nav">
+                <a href="dashboard.html" class="page-nav-link">📊 Dashboard</a>
+                <a href="quantification.html" class="page-nav-link active">💎 Quantification</a>
+                <a href="deposit.html" class="page-nav-link">💰 Deposit</a>
+                <a href="withdraw.html" class="page-nav-link">💸 Withdraw</a>
+                <a href="team.html" class="page-nav-link">👥 Team</a>
+                <a href="about.html" class="page-nav-link">ℹ️ About</a>
+            </nav>
+        </div>
+
+        <!-- Statistics Card -->
+        <div class="card stats-card-container">
+            <h2 style="margin-bottom: 24px; font-size: 20px;">📊 Financial Overview</h2>
+            <div class="stats-grid-modern">
+                <div class="stat-item">
+                    <div class="stat-value" id="balance">0.00</div>
+                    <div class="stat-label">Balance</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="availableFunds">0.00</div>
+                    <div class="stat-label">Available funds</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="unreleased">0.00</div>
+                    <div class="stat-label">Unreleased</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalIncome">0.00</div>
+                    <div class="stat-label">Total income</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="todayIncome">0.00</div>
+                    <div class="stat-label">Today's income</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="yesterdayIncome">0.00</div>
+                    <div class="stat-label">Yesterday's income</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="monthIncome">0.00</div>
+                    <div class="stat-label">This month's income</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="todayCommission">0.00</div>
+                    <div class="stat-label">Today's commission</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="yesterdayCommission">0.00</div>
+                    <div class="stat-label">Yesterday's commission</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Profit Clicks Section -->
+        <div class="card click-card">
+            <div class="click-header">
+                <div>
+                    <h2>Daily Profit Clicks</h2>
+                    <p class="click-subtitle">Earn 5-8% per click</p>
+                </div>
+                <div class="clicks-badge">
+                    <div class="clicks-number" id="clicksLeft">3</div>
+                    <div class="clicks-label">Clicks Left</div>
+                </div>
+            </div>
+            
+            <div class="click-info">
+                <div class="info-item">
+                    <span class="info-label">Current Balance:</span>
+                    <span class="info-value" id="currentBalance">0.00 USDT</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Today's Earnings:</span>
+                    <span class="info-value success" id="todayEarnings">0.00 USDT</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Next Reset:</span>
+                    <span class="info-value" id="resetTime">--:--:--</span>
+                </div>
+            </div>
+
+            <button class="earn-btn-large" id="clickToEarnBtn">
+                <span class="btn-text">Start quantization(<span id="clicksUsedDisplay">0</span>/<span id="maxClicksDisplay">3</span>)</span>
+            </button>
+
+            <div class="reset-info">
+                <p>Resets in: <span id="resetCountdown">--</span></p>
+            </div>
+        </div>
+
+        <!-- User Quantification Live Feed -->
+        <div class="card" style="margin-top: 25px;">
+            <div style="border-bottom: 2px solid rgba(102, 126, 234, 0.2); margin-bottom: 20px;">
+                <div style="display: flex; gap: 0;">
+                    <button class="quant-tab active" onclick="switchQuantTab('user')" id="userTab">
+                        User Quantification
+                    </button>
+                    <button class="quant-tab" onclick="switchQuantTab('team')" id="teamTab">
+                        Team rebate
+                    </button>
+                </div>
+            </div>
+
+            <div id="userQuantContent">
+                <div style="overflow: hidden;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid rgba(100, 116, 139, 0.2);">
+                                <th style="padding: 12px 15px; text-align: left; font-size: 12px; color: #94a3b8; font-weight: 600;">Member name</th>
+                                <th style="padding: 12px 15px; text-align: left; font-size: 12px; color: #94a3b8; font-weight: 600;">Income</th>
+                                <th style="padding: 12px 15px; text-align: left; font-size: 12px; color: #94a3b8; font-weight: 600;">State</th>
+                            </tr>
+                        </thead>
+                        <tbody id="quantFeedTable">
+                            <!-- Dynamic rows will be added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="teamQuantContent" style="display: none;">
+                <p style="text-align: center; color: #64748b; padding: 40px;">Team rebate data will be displayed here</p>
+            </div>
+        </div>
+
+        <!-- Recent Click History -->
+        <div class="card">
+            <h2>Recent Click History</h2>
+            <div class="click-history" id="clickHistory">
+                <p class="no-data">No clicks yet today. Start earning!</p>
+            </div>
+        </div>
+
+        <!-- Live Crypto Market Charts (TradingView) -->
+        <div class="card" style="margin-top: 25px; background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%); border: 1px solid rgba(100, 116, 139, 0.2);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <h2 style="margin: 0; font-size: 18px;">📈 Live Market Charts</h2>
+                    <span style="font-size: 10px; background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 3px 8px; border-radius: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">CryptoQuant</span>
+                </div>
+            </div>
+            
+            <!-- TradingView Charts Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+                <!-- Bitcoin Chart -->
+                <div style="background: rgba(0, 0, 0, 0.3); border-radius: 10px; overflow: hidden; border: 1px solid rgba(247, 147, 26, 0.2);">
+                    <div style="padding: 10px; background: rgba(247, 147, 26, 0.1); border-bottom: 1px solid rgba(247, 147, 26, 0.2);">
+                        <span style="font-size: 12px; font-weight: 600; color: #f7931a;">🟠 Bitcoin (BTC)</span>
+                    </div>
+                    <div class="chart-wrapper" style="height: 300px; position: relative;">
+                        <iframe 
+                            src="https://s.tradingview.com/embed-widget/mini-symbol-overview/?locale=en#%7B%22symbol%22%3A%22BITSTAMP%3ABTCUSD%22%2C%22width%22%3A%22100%25%22%2C%22height%22%3A%22100%25%22%2C%22dateRange%22%3A%221D%22%2C%22colorTheme%22%3A%22dark%22%2C%22trendLineColor%22%3A%22rgba(247%2C%20147%2C%2026%2C%201)%22%2C%22underLineColor%22%3A%22rgba(247%2C%20147%2C%2026%2C%200.3)%22%2C%22underLineBottomColor%22%3A%22rgba(247%2C%20147%2C%2026%2C%200)%22%2C%22isTransparent%22%3Atrue%2C%22autosize%22%3Atrue%2C%22largeChartUrl%22%3A%22%22%7D"
+                            style="width: 100%; height: 100%; border: none; margin: 0; padding: 0;"
+                            frameborder="0"
+                            allowtransparency="true"
+                            scrolling="no">
+                        </iframe>
+                        <div class="chart-overlay"></div>
+                    </div>
+                </div>
+
+                <!-- Ethereum Chart -->
+                <div style="background: rgba(0, 0, 0, 0.3); border-radius: 10px; overflow: hidden; border: 1px solid rgba(98, 126, 234, 0.2);">
+                    <div style="padding: 10px; background: rgba(98, 126, 234, 0.1); border-bottom: 1px solid rgba(98, 126, 234, 0.2);">
+                        <span style="font-size: 12px; font-weight: 600; color: #627eea;">🔵 Ethereum (ETH)</span>
+                    </div>
+                    <div class="chart-wrapper" style="height: 300px; position: relative;">
+                        <iframe 
+                            src="https://s.tradingview.com/embed-widget/mini-symbol-overview/?locale=en#%7B%22symbol%22%3A%22BITSTAMP%3AETHUSD%22%2C%22width%22%3A%22100%25%22%2C%22height%22%3A%22100%25%22%2C%22dateRange%22%3A%221D%22%2C%22colorTheme%22%3A%22dark%22%2C%22trendLineColor%22%3A%22rgba(98%2C%20126%2C%20234%2C%201)%22%2C%22underLineColor%22%3A%22rgba(98%2C%20126%2C%20234%2C%200.3)%22%2C%22underLineBottomColor%22%3A%22rgba(98%2C%20126%2C%20234%2C%200)%22%2C%22isTransparent%22%3Atrue%2C%22autosize%22%3Atrue%2C%22largeChartUrl%22%3A%22%22%7D"
+                            style="width: 100%; height: 100%; border: none; margin: 0; padding: 0;"
+                            frameborder="0"
+                            allowtransparency="true"
+                            scrolling="no">
+                        </iframe>
+                        <div class="chart-overlay"></div>
+                    </div>
+                </div>
+
+                <!-- Solana Chart -->
+                <div style="background: rgba(0, 0, 0, 0.3); border-radius: 10px; overflow: hidden; border: 1px solid rgba(20, 241, 149, 0.2);">
+                    <div style="padding: 10px; background: rgba(20, 241, 149, 0.1); border-bottom: 1px solid rgba(20, 241, 149, 0.2);">
+                        <span style="font-size: 12px; font-weight: 600; color: #14f195;">🟢 Solana (SOL)</span>
+                    </div>
+                    <div class="chart-wrapper" style="height: 300px; position: relative;">
+                        <iframe 
+                            src="https://s.tradingview.com/embed-widget/mini-symbol-overview/?locale=en#%7B%22symbol%22%3A%22BINANCE%3ASOLUSDT%22%2C%22width%22%3A%22100%25%22%2C%22height%22%3A%22100%25%22%2C%22dateRange%22%3A%221D%22%2C%22colorTheme%22%3A%22dark%22%2C%22trendLineColor%22%3A%22rgba(20%2C%20241%2C%20149%2C%201)%22%2C%22underLineColor%22%3A%22rgba(20%2C%20241%2C%20149%2C%200.3)%22%2C%22underLineBottomColor%22%3A%22rgba(20%2C%20241%2C%20149%2C%200)%22%2C%22isTransparent%22%3Atrue%2C%22autosize%22%3Atrue%2C%22largeChartUrl%22%3A%22%22%7D"
+                            style="width: 100%; height: 100%; border: none; margin: 0; padding: 0;"
+                            frameborder="0"
+                            allowtransparency="true"
+                            scrolling="no">
+                        </iframe>
+                        <div class="chart-overlay"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 15px; font-size: 10px; color: #64748b; opacity: 0.7;">
+                Powered by CryptoQuant API · Real-time cryptocurrency prices
+            </div>
+        </div>
+    </div>
+
+    <script src="api-config.js"></script>
+    <script src="quantification.js"></script>
+    <script src="notifications.js"></script>
+    <!-- logout() function is defined globally in api-config.js -->
+</body>
+</html>
+

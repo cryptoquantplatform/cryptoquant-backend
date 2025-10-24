@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw - CryptoQuant</title>
+    <link rel="stylesheet" href="pages-styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <div class="header-top">
+                <div class="header-logo-section">
+                    <a href="index.html" class="page-logo">CryptoQuant</a>
+                    <div>
+                        <h1>Withdraw Crypto</h1>
+                        <p class="page-subtitle">Cash out your earnings to your crypto wallet</p>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+            
+            <!-- Navigation Links -->
+            <nav class="page-nav">
+                <a href="dashboard.html" class="page-nav-link">📊 Dashboard</a>
+                <a href="quantification.html" class="page-nav-link">💎 Quantification</a>
+                <a href="deposit.html" class="page-nav-link">💰 Deposit</a>
+                <a href="withdraw.html" class="page-nav-link active">💸 Withdraw</a>
+                <a href="team.html" class="page-nav-link">👥 Team</a>
+                <a href="about.html" class="page-nav-link">ℹ️ About</a>
+            </nav>
+        </div>
+
+        <div class="content-grid">
+            <div class="main-content">
+                <!-- Available Balance -->
+                <div class="card balance-card">
+                    <div class="balance-info">
+                        <span class="balance-label">Available Balance</span>
+                        <h2 class="balance-amount" id="availableBalance">0.00 USD</h2>
+                    </div>
+                </div>
+
+                <!-- Crypto Selection -->
+                <div class="card">
+                    <h2>Select Cryptocurrency</h2>
+                    <div class="crypto-selector">
+                        <div class="crypto-option selected" data-crypto="usdt">
+                            <div class="crypto-icon">₮</div>
+                            <div class="crypto-info">
+                                <span class="crypto-name">USDT</span>
+                                <span class="crypto-network">Tether (TRC20)</span>
+                            </div>
+                            <div class="crypto-check">✓</div>
+                        </div>
+                        <div class="crypto-option" data-crypto="btc">
+                            <div class="crypto-icon">₿</div>
+                            <div class="crypto-info">
+                                <span class="crypto-name">Bitcoin</span>
+                                <span class="crypto-network">BTC Network</span>
+                            </div>
+                            <div class="crypto-check">✓</div>
+                        </div>
+                        <div class="crypto-option" data-crypto="eth">
+                            <div class="crypto-icon">Ξ</div>
+                            <div class="crypto-info">
+                                <span class="crypto-name">Ethereum</span>
+                                <span class="crypto-network">ERC20</span>
+                            </div>
+                            <div class="crypto-check">✓</div>
+                        </div>
+                        <div class="crypto-option" data-crypto="sol">
+                            <div class="crypto-icon">◎</div>
+                            <div class="crypto-info">
+                                <span class="crypto-name">Solana</span>
+                                <span class="crypto-network">Solana Network</span>
+                            </div>
+                            <div class="crypto-check">✓</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Withdrawal Address -->
+                <div class="card">
+                    <h2>Your Wallet Address</h2>
+                    <div class="form-group">
+                        <label for="walletAddress">Enter your <span id="cryptoNetwork">USDT (TRC20)</span> wallet address</label>
+                        <input type="text" id="walletAddress" placeholder="Enter wallet address" required>
+                        <p class="input-note">⚠️ Make sure the address matches the selected network</p>
+                    </div>
+                </div>
+
+                <!-- Withdrawal Amount -->
+                <div class="card">
+                    <h2>Withdrawal Amount</h2>
+                    <div class="amount-input-group">
+                        <input type="number" id="withdrawAmount" placeholder="Enter amount" step="0.01">
+                        <span class="currency-label">USD</span>
+                    </div>
+                    
+                    <div class="amount-details">
+                        <div class="detail-row">
+                            <span>Amount</span>
+                            <span id="withdrawAmountDisplay">0.00 USD</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>Network Fee</span>
+                            <span id="networkFee">1.00 USD</span>
+                        </div>
+                        <div class="detail-row total">
+                            <span>You will receive</span>
+                            <span id="finalAmount">0.00 USD</span>
+                        </div>
+                    </div>
+
+                    <button class="max-btn" onclick="setMaxAmount()">Use Maximum</button>
+                </div>
+
+                <!-- 2FA Verification -->
+                <div class="card">
+                    <h2>Verification</h2>
+                    <div class="form-group">
+                        <label for="verificationCode">Email Verification Code (Optional)</label>
+                        <div class="verification-group">
+                            <input type="text" id="verificationCode" placeholder="Enter 6-digit code">
+                            <button class="send-code-btn">Send Code</button>
+                        </div>
+                        <p class="input-note">A verification code will be sent to your registered email</p>
+                    </div>
+                </div>
+
+                <button class="submit-btn" onclick="submitWithdrawal()">Submit Withdrawal</button>
+                
+                <div class="security-note">
+                    <p>🔒 For your security, all withdrawals are processed within 24 hours</p>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="info-card">
+                    <h3>Withdrawal Information</h3>
+                    <div class="info-item">
+                        <span class="info-label">Minimum Withdrawal</span>
+                        <span class="info-value">10 USDT</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Processing Time</span>
+                        <span class="info-value">1-24 hours</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Network Fee</span>
+                        <span class="info-value">1 USDT</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Daily Limit</span>
+                        <span class="info-value">10,000 USDT</span>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3>Recent Withdrawals</h3>
+                    <div class="transactions-list" id="recentWithdrawals">
+                        <p class="no-transactions">No recent withdrawals</p>
+                    </div>
+                </div>
+
+                <div class="info-card warning">
+                    <h3>⚠️ Important Notice</h3>
+                    <ul>
+                        <li>Double-check your wallet address before submitting</li>
+                        <li>Withdrawals to wrong addresses cannot be recovered</li>
+                        <li>Ensure the network matches your wallet</li>
+                        <li>All withdrawals are final and irreversible</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="api-config.js"></script>
+    <script src="withdraw.js"></script>
+    <script src="notifications.js"></script>
+    <!-- logout() function is defined globally in api-config.js -->
+</body>
+</html>
+

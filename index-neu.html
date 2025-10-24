@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoQuant - Navigation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .nav-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .nav-btn {
+            display: block;
+            padding: 25px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        .nav-btn:active {
+            transform: scale(0.98);
+        }
+        .emoji {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+        .status {
+            text-align: center;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            background: #e7f3ff;
+            border: 2px solid #2196F3;
+        }
+        .status.checking {
+            background: #fff3cd;
+            border-color: #ffc107;
+        }
+        .status.ok {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+        .status.error {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+        .info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 0.9em;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌟 CryptoQuant</h1>
+        
+        <div id="backendStatus" class="status checking">
+            ⏳ Prüfe Backend-Verbindung...
+        </div>
+
+        <div class="info">
+            <strong>💡 Tipp:</strong> Falls eine Seite nicht lädt, klicken Sie mehrmals oder warten Sie 30 Sekunden (Backend wacht auf).
+        </div>
+
+        <div class="nav-grid">
+            <a href="dashboard.html" class="nav-btn">
+                <span class="emoji">📊</span>Dashboard
+            </a>
+            <a href="deposit.html" class="nav-btn">
+                <span class="emoji">💰</span>Einzahlung
+            </a>
+            <a href="withdraw.html" class="nav-btn">
+                <span class="emoji">💸</span>Auszahlung
+            </a>
+            <a href="team.html" class="nav-btn">
+                <span class="emoji">👥</span>Team
+            </a>
+            <a href="quantification.html" class="nav-btn">
+                <span class="emoji">📈</span>Quantification
+            </a>
+            <a href="admin-login.html" class="nav-btn">
+                <span class="emoji">🔐</span>Admin Login
+            </a>
+            <a href="login.html" class="nav-btn" style="background: linear-gradient(135deg, #34c759 0%, #28a745 100%);">
+                <span class="emoji">🚪</span>Login
+            </a>
+            <a href="register.html" class="nav-btn" style="background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);">
+                <span class="emoji">✨</span>Registrieren
+            </a>
+        </div>
+
+        <div class="info" style="margin-top: 30px;">
+            <strong>🛠️ Probleme?</strong><br>
+            1. Leeren Sie den Browser-Cache<br>
+            2. Nutzen Sie Inkognito-Modus<br>
+            3. Warten Sie 30 Sekunden nach dem Klick
+        </div>
+    </div>
+
+    <script>
+        // Backend Status prüfen
+        async function checkBackend() {
+            const statusDiv = document.getElementById('backendStatus');
+            
+            try {
+                const response = await fetch('https://cryptoquant-api.onrender.com/api/health');
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusDiv.className = 'status ok';
+                    statusDiv.innerHTML = '✅ Backend ist online und bereit!';
+                } else {
+                    throw new Error('Backend antwortet nicht korrekt');
+                }
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '⚠️ Backend wacht auf... Bitte warten Sie 30 Sekunden und laden Sie die Seite neu.';
+                
+                // Try to wake it up
+                setTimeout(() => {
+                    checkBackend();
+                }, 5000);
+            }
+        }
+
+        // Auto-check on load
+        window.addEventListener('load', () => {
+            setTimeout(checkBackend, 1000);
+        });
+
+        // Wake backend when clicking any link
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // Let the link work normally
+                // But also ping backend
+                fetch('https://cryptoquant-api.onrender.com/api/health').catch(() => {});
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - CryptoQuant</title>
+    <link rel="stylesheet" href="auth-styles.css">
+    <style>
+        .admin-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .admin-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        .admin-title {
+            font-size: 28px;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .admin-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+
+        .auth-container {
+            max-width: 450px;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="admin-header">
+            <div class="admin-icon">🔐</div>
+            <h1 class="admin-title">Admin Panel</h1>
+            <p class="admin-subtitle">CryptoQuant Administration</p>
+        </div>
+
+        <div class="auth-box">
+            <form id="adminLoginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        required
+                        autocomplete="username"
+                        placeholder="Enter admin username"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required
+                        autocomplete="current-password"
+                        placeholder="Enter password"
+                    >
+                </div>
+
+                <button type="submit" class="auth-btn" id="loginBtn">
+                    Login to Admin Panel
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <a href="index.html" style="color: rgba(255,255,255,0.7); text-decoration: none;">
+                    ← Back to Main Site
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="api-config.js"></script>
+    <script>
+        const form = document.getElementById('adminLoginForm');
+        const loginBtn = document.getElementById('loginBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (!username || !password) {
+                alert('Please enter username and password');
+                return;
+            }
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in...';
+
+            try {
+                const response = await fetch(API_BASE_URL + '/admin/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Login failed');
+                }
+
+                // Store admin token
+                localStorage.setItem('adminToken', data.token);
+                localStorage.setItem('adminUser', JSON.stringify(data.admin));
+
+                // Redirect to admin dashboard
+                window.location.href = 'admin-dashboard.html';
+
+            } catch (error) {
+                alert('Error: ' + error.message);
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login to Admin Panel';
+            }
+        });
+
+        // Check if already logged in
+        if (localStorage.getItem('adminToken')) {
+            window.location.href = 'admin-dashboard.html';
+        }
+    </script>
+</body>
+</html>
+
+

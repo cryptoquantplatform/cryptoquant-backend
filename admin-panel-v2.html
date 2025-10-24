@@ -1,0 +1,2193 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoQuant - Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            min-height: 100vh;
+            color: #e2e8f0;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(148, 163, 184, 0.1);
+            padding: 20px;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3b82f6;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item {
+            padding: 15px 20px;
+            margin: 8px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #94a3b8;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 30px;
+        }
+
+        .header {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(59, 130, 246, 0.2);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #f1f5f9;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .control-panel {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.online {
+            background: #10b981;
+            box-shadow: 0 0 10px #10b981;
+        }
+
+        .status-indicator.offline {
+            background: #ef4444;
+            box-shadow: 0 0 10px #ef4444;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .log-container {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            background: rgba(30, 41, 59, 0.4);
+            border-left: 3px solid #3b82f6;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .log-entry.success { border-left-color: #10b981; }
+        .log-entry.error { border-left-color: #ef4444; }
+        .log-entry.warning { border-left-color: #f59e0b; }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .badge-error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #f1f5f9;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.3);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(59, 130, 246, 0.5);
+        }
+
+        .chart-container {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .timestamp {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .user-table {
+            width: 100%;
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            overflow: hidden;
+        }
+
+        .user-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .user-table th {
+            background: rgba(59, 130, 246, 0.1);
+            padding: 15px;
+            text-align: left;
+            color: #3b82f6;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .user-table td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.05);
+            color: #e2e8f0;
+        }
+
+        .user-table tr:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            margin: 0 3px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .action-btn.edit {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .action-btn.delete {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .action-btn.add-balance {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #f1f5f9;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .btn-secondary {
+            background: rgba(100, 116, 139, 0.3);
+            color: #e2e8f0;
+        }
+
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-box {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .login-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #3b82f6;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .log-table {
+            width: 100%;
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            overflow-x: auto;
+        }
+
+        .log-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .log-table th {
+            background: rgba(139, 92, 246, 0.1);
+            padding: 15px;
+            text-align: left;
+            color: #8b5cf6;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            white-space: nowrap;
+        }
+
+        .log-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.05);
+            color: #e2e8f0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .log-table tr:hover {
+            background: rgba(139, 92, 246, 0.05);
+        }
+
+        .filter-bar {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 15px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-size: 14px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-chart-line"></i>
+            CryptoQuant
+        </div>
+        <div class="nav-item active" onclick="showSection('dashboard')">
+            <i class="fas fa-home"></i>
+            Dashboard
+        </div>
+        <div class="nav-item" onclick="showSection('users')">
+            <i class="fas fa-users"></i>
+            User Verwaltung
+        </div>
+        <div class="nav-item" onclick="showSection('usercontrol')">
+            <i class="fas fa-user-cog"></i>
+            User Control (God Mode)
+        </div>
+        <div class="nav-item" onclick="showSection('deposits')">
+            <i class="fas fa-wallet"></i>
+            Deposit Logs
+        </div>
+        <div class="nav-item" onclick="showSection('iptracking')">
+            <i class="fas fa-map-marker-alt"></i>
+            IP Tracking
+        </div>
+        <div class="nav-item" onclick="showSection('logs')">
+            <i class="fas fa-file-alt"></i>
+            Login/Register Logs
+        </div>
+        <div class="nav-item" onclick="showSection('monitoring')">
+            <i class="fas fa-server"></i>
+            Server Monitoring
+        </div>
+        <div class="nav-item" onclick="showSection('settings')">
+            <i class="fas fa-cog"></i>
+            Einstellungen
+        </div>
+    </div>
+
+    <!-- Login Overlay -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-box">
+            <div class="login-title">
+                <i class="fas fa-shield-alt"></i> Admin Login
+            </div>
+            <p style="text-align: center; color: #94a3b8; margin-bottom: 30px;">Bitte melden Sie sich an</p>
+            <div class="form-group">
+                <label>Admin Passwort</label>
+                <input type="password" id="adminPassword" placeholder="Passwort eingeben..." onkeypress="if(event.key==='Enter') adminLogin()">
+            </div>
+            <button class="btn btn-primary" style="width: 100%;" onclick="adminLogin()">
+                <i class="fas fa-sign-in-alt"></i> Einloggen
+            </button>
+            <p style="text-align: center; color: #64748b; font-size: 12px; margin-top: 15px;">
+                Standard-Passwort: admin123
+            </p>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div>
+                <h1>Admin Dashboard</h1>
+                <p style="color: #64748b; margin-top: 5px;">Willkommen zurück! Hier ist Ihre System-Übersicht.</p>
+            </div>
+            <div>
+                <span class="status-indicator online"></span>
+                <span style="color: #10b981; font-weight: 600;">System Online</span>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" class="section active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-value" id="totalUsers">0</div>
+                    <div class="stat-label">Registrierte User</div>
+        </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">
+                        <i class="fas fa-signal"></i>
+                    </div>
+                    <div class="stat-value" id="pingCount">0</div>
+                    <div class="stat-label">Server Pings</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b;">
+                        <i class="fas fa-sign-in-alt"></i>
+                    </div>
+                    <div class="stat-value" id="totalLogins">0</div>
+                    <div class="stat-label">Logins Heute</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(139, 92, 246, 0.2); color: #8b5cf6;">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-value" id="uptime">0s</div>
+                    <div class="stat-label">Uptime</div>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <div class="section-title">Backend Keep-Alive Steuerung</div>
+                <div style="background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 3px solid #3b82f6;">
+                    <strong><i class="fas fa-info-circle"></i> Info:</strong> Der Keep-Alive Service hält Ihren Render.com Server aktiv, indem er alle 10 Minuten einen Health-Check durchführt.
+                </div>
+                <div id="serviceStatus" style="font-size: 18px; margin-bottom: 15px; color: #f59e0b;">
+                    <i class="fas fa-pause-circle"></i> Service Status: <span class="badge badge-warning">Gestoppt</span>
+                </div>
+                <div class="button-group">
+                    <button id="startBtn" class="btn btn-primary" onclick="startMonitoring()">
+                        <i class="fas fa-play"></i> Service Starten
+        </button>
+                    <button id="stopBtn" class="btn btn-danger" onclick="stopMonitoring()" style="display: none;">
+                        <i class="fas fa-stop"></i> Service Stoppen
+        </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Management Section -->
+        <div id="usersSection" class="section">
+            <div class="section-title">
+                <i class="fas fa-users"></i> User Verwaltung
+            </div>
+            
+            <div id="dataSourceInfo" style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 3px solid #10b981; display: none;">
+                <strong><i class="fas fa-database"></i> Datenquelle:</strong> <span id="dataSourceText">Lade...</span>
+            </div>
+            
+            <div class="filter-bar">
+                <input type="text" class="search-input" id="userSearch" placeholder="🔍 User suchen (Name, Email, ID...)">
+                <button class="btn btn-primary" onclick="loadUsers()">
+                    <i class="fas fa-sync"></i> Aktualisieren
+                </button>
+            </div>
+
+            <div class="user-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Balance</th>
+                            <th>Registriert</th>
+                            <th>Last Login</th>
+                            <th>IP Adresse</th>
+                            <th>Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 40px; color: #64748b;">
+                                <i class="fas fa-spinner fa-spin"></i> Lade User-Daten...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- User Control (God Mode) Section -->
+        <div id="usercontrolSection" class="section">
+            <div class="section-title">
+                <i class="fas fa-user-cog"></i> User Control - God Mode
+            </div>
+            
+            <div style="background: rgba(139, 92, 246, 0.2); color: #8b5cf6; padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 3px solid #8b5cf6;">
+                <strong><i class="fas fa-crown"></i> Admin God Mode:</strong> Hier können Sie ALLES an jedem User bearbeiten - Balance, Level, Referrals, Deposits, Withdrawals, etc.
+            </div>
+            
+            <div class="filter-bar">
+                <input type="text" class="search-input" id="controlSearch" placeholder="🔍 User suchen...">
+                <button class="btn btn-primary" onclick="loadControlUsers()">
+                    <i class="fas fa-sync"></i> Aktualisieren
+                </button>
+            </div>
+
+            <div class="user-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Balance</th>
+                            <th>Referrals</th>
+                            <th>Level</th>
+                            <th>Status</th>
+                            <th>God Mode Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody id="controlTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 40px; color: #64748b;">
+                                <i class="fas fa-spinner fa-spin"></i> Lade User...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- IP Tracking Section -->
+        <div id="iptrackingSection" class="section">
+            <div class="section-title">
+                <i class="fas fa-map-marker-alt"></i> IP Tracking & VPN Detection
+            </div>
+            
+            <div id="ipSourceInfo" style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 3px solid #10b981; display: none;">
+                <strong><i class="fas fa-database"></i> Datenquelle:</strong> <span id="ipSourceText">Lade...</span>
+            </div>
+            
+            <div class="filter-bar">
+                <input type="text" class="search-input" id="ipSearch" placeholder="🔍 IP-Logs durchsuchen (User, Email, IP...)">
+                <select class="search-input" style="flex: 0 0 200px;" id="ipVpnFilter" onchange="filterIpLogs()">
+                    <option value="all">Alle IPs</option>
+                    <option value="vpn">Nur VPN/Proxy</option>
+                    <option value="clean">Nur Normale IPs</option>
+                </select>
+                <button class="btn btn-primary" onclick="loadIpTracking()">
+                    <i class="fas fa-sync"></i> Aktualisieren
+                </button>
+            </div>
+
+            <div class="log-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Zeit</th>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>IP Adresse</th>
+                            <th>Land / Stadt</th>
+                            <th>ISP</th>
+                            <th>VPN/Proxy</th>
+                            <th>Aktion</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ipTrackingTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 40px; color: #64748b;">
+                                <i class="fas fa-spinner fa-spin"></i> Lade IP-Tracking Daten...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Deposit Logs Section -->
+        <div id="depositsSection" class="section">
+            <div class="section-title">
+                <i class="fas fa-wallet"></i> Deposit Logs
+            </div>
+            
+            <div id="depositSourceInfo" style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 3px solid #10b981; display: none;">
+                <strong><i class="fas fa-database"></i> Datenquelle:</strong> <span id="depositSourceText">Lade...</span>
+            </div>
+            
+            <div class="filter-bar">
+                <input type="text" class="search-input" id="depositSearch" placeholder="🔍 Deposits durchsuchen...">
+                <select class="search-input" style="flex: 0 0 200px;" id="depositStatusFilter" onchange="filterDeposits()">
+                    <option value="all">Alle Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+                <button class="btn btn-primary" onclick="loadDeposits()">
+                    <i class="fas fa-sync"></i> Aktualisieren
+                </button>
+            </div>
+
+            <div class="log-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Zeit</th>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Crypto</th>
+                            <th>Betrag</th>
+                            <th>Wallet Adresse</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="depositsTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px; color: #64748b;">
+                                <i class="fas fa-spinner fa-spin"></i> Lade Deposits...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Logs Section -->
+        <div id="logsSection" class="section">
+            <div class="section-title">
+                <i class="fas fa-file-alt"></i> Login & Registrierungs Logs
+            </div>
+            
+            <div id="logSourceInfo" style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 3px solid #10b981; display: none;">
+                <strong><i class="fas fa-database"></i> Datenquelle:</strong> <span id="logSourceText">Lade...</span>
+            </div>
+            
+            <div class="filter-bar">
+                <input type="text" class="search-input" id="logSearch" placeholder="🔍 Logs durchsuchen...">
+                <select class="search-input" style="flex: 0 0 200px;" id="logTypeFilter" onchange="filterLogs()">
+                    <option value="all">Alle Events</option>
+                    <option value="login">Nur Logins</option>
+                    <option value="register">Nur Registrierungen</option>
+                    <option value="failed">Nur Fehler</option>
+                </select>
+                <button class="btn btn-primary" onclick="loadLogs()">
+                    <i class="fas fa-sync"></i> Aktualisieren
+                </button>
+            </div>
+
+            <div class="log-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Zeit</th>
+                            <th>Event</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Passwort</th>
+                            <th>IP Adresse</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logsTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px; color: #64748b;">
+                                <i class="fas fa-spinner fa-spin"></i> Lade Logs...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Monitoring Section -->
+        <div id="monitoringSection" class="section">
+            <div class="section-title">Server Monitoring</div>
+            <div class="chart-container">
+                <div class="section-title">Live Aktivitäts-Log</div>
+                <div id="logContainer" class="log-container">
+                    <div class="log-entry">
+                        <i class="fas fa-info-circle" style="color: #3b82f6;"></i>
+                        <span class="timestamp">[--:--:--]</span>
+                        <span>System bereit. Starten Sie den Service um das Monitoring zu aktivieren.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="settingsSection" class="section">
+            <div class="section-title">Einstellungen</div>
+            <div class="control-panel">
+                <div class="form-group">
+                    <label>Admin Passwort ändern</label>
+                    <input type="password" id="newAdminPassword" placeholder="Neues Passwort eingeben...">
+                </div>
+                <button class="btn btn-primary" onclick="changeAdminPassword()">
+                    <i class="fas fa-save"></i> Passwort Speichern
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="fas fa-user-edit"></i> User Bearbeiten
+            </div>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="editUsername">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="editEmail">
+            </div>
+            <div class="form-group">
+                <label>Balance (€)</label>
+                <input type="number" id="editBalance" step="0.01">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="saveUserChanges()">
+                    <i class="fas fa-save"></i> Speichern
+        </button>
+                <button class="btn btn-secondary" onclick="closeModal('editUserModal')">
+                    <i class="fas fa-times"></i> Abbrechen
+        </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addBalanceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="fas fa-coins"></i> Balance Hinzufügen
+            </div>
+            <p style="color: #94a3b8; margin-bottom: 20px;">User: <strong id="balanceUsername"></strong></p>
+            <div class="form-group">
+                <label>Betrag hinzufügen (€)</label>
+                <input type="number" id="addBalanceAmount" step="0.01" placeholder="z.B. 1000.00">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="addBalanceToUser()">
+                    <i class="fas fa-plus"></i> Hinzufügen
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal('addBalanceModal')">
+                    <i class="fas fa-times"></i> Abbrechen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- God Mode Modals -->
+    <div id="godModeModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <i class="fas fa-crown"></i> God Mode - <span id="godModeUsername"></span>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label>Balance (€)</label>
+                    <input type="number" id="godBalance" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Referrals (Level berechnet sich automatisch)</label>
+                    <input type="number" id="godReferrals" min="0" max="1000" oninput="updateLevelFromReferrals()">
+                </div>
+                <div class="form-group">
+                    <label>Level (automatisch: Referrals ÷ 5)</label>
+                    <input type="number" id="godLevel" min="1" max="100" readonly style="background: rgba(100, 116, 139, 0.2);">
+                </div>
+                <div class="form-group">
+                    <label>Total Earnings (€)</label>
+                    <input type="number" id="godEarnings" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Email Verified</label>
+                    <select id="godEmailVerified">
+                        <option value="true">✅ Ja</option>
+                        <option value="false">❌ Nein</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Account Status</label>
+                    <select id="godIsActive">
+                        <option value="true">✅ Aktiv</option>
+                        <option value="false">🔒 Gesperrt</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="godUsername">
+                </div>
+            </div>
+            <div class="modal-buttons" style="margin-top: 25px;">
+                <button class="btn btn-primary" onclick="saveGodMode()">
+                    <i class="fas fa-save"></i> Alle Änderungen Speichern
+                </button>
+                <button class="btn btn-secondary" onclick="closeGodModeModal()">
+                    <i class="fas fa-times"></i> Abbrechen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addBalanceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="fas fa-plus-circle"></i> Balance Hinzufügen
+            </div>
+            <p style="color: #94a3b8; margin-bottom: 20px;">User: <strong id="addBalanceUsername"></strong></p>
+            <div class="form-group">
+                <label>Betrag Hinzufügen (€)</label>
+                <input type="number" id="addBalanceAmountInput" step="0.01" placeholder="z.B. 1000.00">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="quickAddBalance()">
+                    <i class="fas fa-plus"></i> Balance Hinzufügen
+                </button>
+                <button class="btn btn-secondary" onclick="closeAddBalanceModal()">
+                    <i class="fas fa-times"></i> Abbrechen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteBalanceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="fas fa-minus-circle"></i> Balance Reduzieren
+            </div>
+            <p style="color: #94a3b8; margin-bottom: 20px;">User: <strong id="deleteBalanceUsername"></strong></p>
+            <p style="color: #94a3b8; margin-bottom: 20px;">Aktuelle Balance: <strong style="color: #10b981;" id="deleteBalanceCurrent">€0.00</strong></p>
+            <div class="form-group">
+                <label>Betrag Abziehen (€)</label>
+                <input type="number" id="deleteBalanceAmountInput" step="0.01" placeholder="z.B. 500.00">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" style="background: #ef4444;" onclick="quickDeleteBalance()">
+                    <i class="fas fa-minus"></i> Balance Abziehen
+                </button>
+                <button class="btn btn-secondary" onclick="closeDeleteBalanceModal()">
+                    <i class="fas fa-times"></i> Abbrechen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://cryptoquant-api.onrender.com';
+        const PING_INTERVAL = 10 * 60 * 1000; // 10 Minuten
+        const ADMIN_PASSWORD = 'admin123'; // Ändern Sie dies!
+        
+        let monitoringInterval = null;
+        let pingCount = 0;
+        let startTime = null;
+        let responseTimes = [];
+        let successCount = 0;
+        let totalPings = 0;
+        let currentEditingUser = null;
+        let allUsers = [];
+        let allLogs = [];
+
+        // Login Funktion
+        function adminLogin() {
+            const password = document.getElementById('adminPassword').value;
+            if (password === ADMIN_PASSWORD) {
+                document.getElementById('loginOverlay').style.display = 'none';
+                initializePanel();
+            } else {
+                alert('❌ Falsches Passwort!');
+            }
+        }
+
+        // Panel Initialisierung
+        function initializePanel() {
+            loadUsers();
+            loadControlUsers(); // Load God Mode users
+            loadDeposits();
+            loadIpTracking();
+            loadLogs();
+            setInterval(updateStats, 1000);
+        }
+
+        // Section Navigation
+        function showSection(sectionName) {
+            // Alle Sections verstecken
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Ausgewählte Section anzeigen
+            const sectionMap = {
+                'dashboard': 'dashboardSection',
+                'users': 'usersSection',
+                'usercontrol': 'usercontrolSection',
+                'deposits': 'depositsSection',
+                'iptracking': 'iptrackingSection',
+                'logs': 'logsSection',
+                'monitoring': 'monitoringSection',
+                'settings': 'settingsSection'
+            };
+            
+            const targetSection = document.getElementById(sectionMap[sectionName]);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
+            // Navigation highlighting
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.nav-item').classList.add('active');
+            
+            // Daten laden wenn nötig
+            if (sectionName === 'users') loadUsers();
+            if (sectionName === 'usercontrol') loadControlUsers();
+            if (sectionName === 'deposits') loadDeposits();
+            if (sectionName === 'iptracking') loadIpTracking();
+            if (sectionName === 'logs') loadLogs();
+        }
+
+        // User Management Funktionen
+        async function loadUsers() {
+            const infoBox = document.getElementById('dataSourceInfo');
+            const infoText = document.getElementById('dataSourceText');
+            
+            try {
+                // FIRST TRY: Test endpoint (no auth required)
+                const testResponse = await fetch(`${API_URL}/api/test/users`);
+                const testData = await testResponse.json();
+                
+                if (testData.success && testData.users && testData.users.length > 0) {
+                    console.log('✅ Loaded REAL users from database:', testData.users.length);
+                    allUsers = testData.users;
+                    displayUsers(allUsers);
+                    document.getElementById('totalUsers').textContent = allUsers.length;
+                    
+                    // Show success indicator
+                    infoBox.style.display = 'block';
+                    infoBox.style.background = 'rgba(16, 185, 129, 0.2)';
+                    infoBox.style.borderColor = '#10b981';
+                    infoBox.style.color = '#10b981';
+                    infoText.innerHTML = `✅ ECHTE Daten aus Datenbank (${testData.users.length} User)`;
+                    return;
+                }
+                
+                // FALLBACK: Try auth endpoint
+                const response = await fetch(`${API_URL}/api/admin/users`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success && data.users && data.users.length > 0) {
+                    console.log('✅ Loaded users from admin endpoint');
+                    allUsers = data.users;
+                    displayUsers(allUsers);
+                    document.getElementById('totalUsers').textContent = allUsers.length;
+                    
+                    // Show success indicator
+                    infoBox.style.display = 'block';
+                    infoBox.style.background = 'rgba(16, 185, 129, 0.2)';
+                    infoBox.style.borderColor = '#10b981';
+                    infoBox.style.color = '#10b981';
+                    infoText.innerHTML = `✅ ECHTE Daten aus Datenbank (${data.users.length} User)`;
+                } else {
+                    // Demo-Daten falls API nicht verfügbar
+                    console.warn('⚠️ No real users found, showing demo data');
+                    allUsers = generateDemoUsers();
+                    displayUsers(allUsers);
+                    document.getElementById('totalUsers').textContent = allUsers.length;
+                    
+                    // Show warning indicator
+                    infoBox.style.display = 'block';
+                    infoBox.style.background = 'rgba(239, 68, 68, 0.2)';
+                    infoBox.style.borderColor = '#ef4444';
+                    infoBox.style.color = '#ef4444';
+                    infoText.innerHTML = '⚠️ DEMO-Daten! API nicht erreichbar oder keine User in Datenbank!';
+                }
+            } catch (error) {
+                console.error('❌ Error loading users:', error);
+                // Demo-Daten anzeigen
+                allUsers = generateDemoUsers();
+                displayUsers(allUsers);
+                document.getElementById('totalUsers').textContent = allUsers.length;
+                
+                // Show error indicator
+                infoBox.style.display = 'block';
+                infoBox.style.background = 'rgba(239, 68, 68, 0.2)';
+                infoBox.style.borderColor = '#ef4444';
+                infoBox.style.color = '#ef4444';
+                infoText.innerHTML = `❌ DEMO-Daten! Fehler: ${error.message}`;
+            }
+        }
+
+        function generateDemoUsers() {
+            // DEMO DATA - Wird nur angezeigt wenn API nicht erreichbar ist!
+            console.error('⚠️⚠️⚠️ USING DEMO DATA - API NOT REACHABLE! ⚠️⚠️⚠️');
+            return [
+                { id: 999, username: '⚠️ DEMO_USER (API fehlt!)', email: 'demo@example.com', balance: 0.00, created_at: '2025-01-15', last_login: '2025-10-23', ip_address: '0.0.0.0' }
+            ];
+        }
+
+        function displayUsers(users) {
+            const tbody = document.getElementById('usersTableBody');
+            
+            if (users.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 40px; color: #64748b;">
+                            Keine User gefunden
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>${user.id}</td>
+                    <td><strong>${user.username}</strong></td>
+                    <td>${user.email}</td>
+                    <td><span style="color: #10b981; font-weight: 600;">€${parseFloat(user.balance || 0).toFixed(2)}</span></td>
+                    <td>${formatDate(user.created_at)}</td>
+                    <td>${formatDate(user.last_login)}</td>
+                    <td><code>${user.ip_address || '0.0.0.0'}</code></td>
+                    <td>
+                        <button class="action-btn edit" onclick="editUser(${user.id})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="action-btn add-balance" onclick="openAddBalance(${user.id})">
+                            <i class="fas fa-coins"></i> Balance
+                        </button>
+                        <button class="action-btn delete" onclick="deleteUser(${user.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function editUser(userId) {
+            currentEditingUser = allUsers.find(u => u.id === userId);
+            if (!currentEditingUser) return;
+            
+            document.getElementById('editUsername').value = currentEditingUser.username;
+            document.getElementById('editEmail').value = currentEditingUser.email;
+            document.getElementById('editBalance').value = currentEditingUser.balance;
+            
+            openModal('editUserModal');
+        }
+
+        async function saveUserChanges() {
+            if (!currentEditingUser) return;
+            
+            const updatedUser = {
+                username: document.getElementById('editUsername').value,
+                email: document.getElementById('editEmail').value,
+                balance: parseFloat(document.getElementById('editBalance').value)
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/api/admin/users/${currentEditingUser.id}`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    },
+                    body: JSON.stringify(updatedUser)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('✅ User erfolgreich aktualisiert!');
+                    loadUsers();
+                    closeModal('editUserModal');
+                } else {
+                    // Demo Mode fallback
+                    const index = allUsers.findIndex(u => u.id === currentEditingUser.id);
+                    allUsers[index] = { ...currentEditingUser, ...updatedUser };
+                    displayUsers(allUsers);
+                    alert('✅ User erfolgreich aktualisiert! (Demo-Mode)');
+                    closeModal('editUserModal');
+                }
+            } catch (error) {
+                // Demo: Update lokal
+                const index = allUsers.findIndex(u => u.id === currentEditingUser.id);
+                allUsers[index] = { ...currentEditingUser, ...updatedUser };
+                displayUsers(allUsers);
+                alert('✅ User erfolgreich aktualisiert! (Demo-Mode)');
+                closeModal('editUserModal');
+            }
+        }
+
+        function openAddBalance(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            currentEditingUser = user;
+            document.getElementById('balanceUsername').textContent = user.username;
+            document.getElementById('addBalanceAmount').value = '';
+            openModal('addBalanceModal');
+        }
+
+        async function addBalanceToUser() {
+            if (!currentEditingUser) return;
+            
+            const amount = parseFloat(document.getElementById('addBalanceAmount').value);
+            if (isNaN(amount) || amount <= 0) {
+                alert('❌ Bitte geben Sie einen gültigen Betrag ein!');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/api/admin/users/${currentEditingUser.id}/balance`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    },
+                    body: JSON.stringify({ amount })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`✅ €${amount.toFixed(2)} erfolgreich hinzugefügt!`);
+                    loadUsers();
+                    closeModal('addBalanceModal');
+                } else {
+                    // Demo fallback
+                    const index = allUsers.findIndex(u => u.id === currentEditingUser.id);
+                    allUsers[index].balance += amount;
+                    displayUsers(allUsers);
+                    alert(`✅ €${amount.toFixed(2)} erfolgreich hinzugefügt! (Demo-Mode)`);
+                    closeModal('addBalanceModal');
+                }
+            } catch (error) {
+                // Demo: Update lokal
+                const index = allUsers.findIndex(u => u.id === currentEditingUser.id);
+                allUsers[index].balance += amount;
+                displayUsers(allUsers);
+                alert(`✅ €${amount.toFixed(2)} erfolgreich hinzugefügt! (Demo-Mode)`);
+                closeModal('addBalanceModal');
+            }
+        }
+
+        async function deleteUser(userId) {
+            if (!confirm('⚠️ Wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden!')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/admin/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('✅ User erfolgreich gelöscht!');
+                    loadUsers();
+                } else {
+                    // Demo fallback
+                    allUsers = allUsers.filter(u => u.id !== userId);
+                    displayUsers(allUsers);
+                    alert('✅ User erfolgreich gelöscht! (Demo-Mode)');
+                }
+            } catch (error) {
+                // Demo: Lokal löschen
+                allUsers = allUsers.filter(u => u.id !== userId);
+                displayUsers(allUsers);
+                alert('✅ User erfolgreich gelöscht! (Demo-Mode)');
+            }
+        }
+
+        // ======== GOD MODE / USER CONTROL FUNKTIONEN ========
+        let allControlUsers = [];
+
+        async function loadControlUsers() {
+            console.log('🔄 Loading God Mode users...');
+            const tbody = document.getElementById('controlTableBody');
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Lade User...</td></tr>';
+            }
+            
+            try {
+                const url = `${API_URL}/api/test/users`;
+                console.log('📡 Fetching from:', url);
+                const response = await fetch(url);
+                const data = await response.json();
+                console.log('📦 God Mode data received:', data);
+                
+                if (data.success && data.users && data.users.length > 0) {
+                    console.log('✅ Loaded users for God Mode:', data.users.length, data.users);
+                    allControlUsers = data.users;
+                    displayControlUsers(allControlUsers);
+                } else {
+                    console.warn('⚠️ No users found in God Mode');
+                    allControlUsers = [];
+                    displayControlUsers(allControlUsers);
+                }
+            } catch (error) {
+                console.error('❌ Error loading control users:', error);
+                allControlUsers = [];
+                displayControlUsers(allControlUsers);
+            }
+        }
+
+        function displayControlUsers(users) {
+            console.log('🎨 Displaying God Mode users:', users);
+            const tbody = document.getElementById('controlTableBody');
+            
+            if (!tbody) {
+                console.error('❌ controlTableBody not found!');
+                return;
+            }
+            
+            if (!users || users.length === 0) {
+                console.warn('⚠️ No users to display');
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: #64748b;">Keine User gefunden</td></tr>';
+                return;
+            }
+            
+            console.log('✅ Displaying', users.length, 'users in table');
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>${user.id}</td>
+                    <td><strong>${user.username}</strong></td>
+                    <td>${user.email}</td>
+                    <td><span style="color: #10b981; font-weight: 600;">€${parseFloat(user.balance || 0).toFixed(2)}</span></td>
+                    <td><span style="color: #8b5cf6; font-weight: 600;"><i class="fas fa-users"></i> ${user.referral_count || 0}</span></td>
+                    <td><span style="color: #f59e0b; font-weight: 600;">Level ${user.level || 1}</span></td>
+                    <td>
+                        <span class="${user.is_active ? 'status-badge-active' : 'status-badge-inactive'}">
+                            ${user.is_active ? '✅ Aktiv' : '🔒 Gesperrt'}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                            <button class="action-btn edit" onclick="openGodMode(${user.id})" title="Alle Daten bearbeiten">
+                                <i class="fas fa-crown"></i> Edit All
+                            </button>
+                            <button class="action-btn" style="background: #10b981;" onclick="openQuickAddBalance(${user.id})" title="Balance hinzufügen">
+                                <i class="fas fa-plus-circle"></i> Add Balance
+                            </button>
+                            <button class="action-btn" style="background: #ef4444;" onclick="openQuickDeleteBalance(${user.id})" title="Balance reduzieren">
+                                <i class="fas fa-minus-circle"></i> Delete Balance
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openGodMode(userId) {
+            const user = allControlUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            currentEditingUser = user;
+            document.getElementById('godModeUsername').textContent = user.username;
+            document.getElementById('godBalance').value = parseFloat(user.balance || 0).toFixed(2);
+            document.getElementById('godReferrals').value = user.referral_count || 0;
+            document.getElementById('godLevel').value = Math.max(1, Math.floor((user.referral_count || 0) / 5));
+            document.getElementById('godEarnings').value = parseFloat(user.total_earnings || 0).toFixed(2);
+            document.getElementById('godEmailVerified').value = user.email_verified ? 'true' : 'false';
+            document.getElementById('godIsActive').value = user.is_active ? 'true' : 'false';
+            document.getElementById('godUsername').value = user.username;
+            
+            document.getElementById('godModeModal').style.display = 'flex';
+        }
+
+        function updateLevelFromReferrals() {
+            const referrals = parseInt(document.getElementById('godReferrals').value) || 0;
+            const level = Math.max(1, Math.floor(referrals / 5));
+            document.getElementById('godLevel').value = level;
+        }
+
+        function closeGodModeModal() {
+            document.getElementById('godModeModal').style.display = 'none';
+        }
+
+        async function saveGodMode() {
+            if (!currentEditingUser) return;
+            
+            const referrals = parseInt(document.getElementById('godReferrals').value) || 0;
+            const level = Math.max(1, Math.floor(referrals / 5));
+            
+            const updates = [
+                { field: 'balance', value: parseFloat(document.getElementById('godBalance').value) },
+                { field: 'referral_count', value: referrals },
+                { field: 'level', value: level },
+                { field: 'total_earnings', value: parseFloat(document.getElementById('godEarnings').value) },
+                { field: 'email_verified', value: document.getElementById('godEmailVerified').value === 'true' },
+                { field: 'is_active', value: document.getElementById('godIsActive').value === 'true' },
+                { field: 'full_name', value: document.getElementById('godUsername').value }
+            ];
+            
+            try {
+                let success = true;
+                for (const update of updates) {
+                    const response = await fetch(`${API_URL}/api/test/user-control/${currentEditingUser.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(update)
+                    });
+                    const data = await response.json();
+                    if (!data.success) success = false;
+                }
+                
+                if (success) {
+                    alert('✅ Alle Änderungen erfolgreich gespeichert!');
+                    loadControlUsers();
+                    closeGodModeModal();
+                } else {
+                    alert('⚠️ Einige Änderungen konnten nicht gespeichert werden.');
+                }
+            } catch (error) {
+                console.error('God mode error:', error);
+                alert('❌ Fehler beim Speichern: ' + error.message);
+            }
+        }
+
+        function openQuickAddBalance(userId) {
+            const user = allControlUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            currentEditingUser = user;
+            document.getElementById('addBalanceUsername').textContent = user.username;
+            document.getElementById('addBalanceAmountInput').value = '';
+            document.getElementById('addBalanceModal').style.display = 'flex';
+        }
+
+        function closeAddBalanceModal() {
+            document.getElementById('addBalanceModal').style.display = 'none';
+        }
+
+        async function quickAddBalance() {
+            if (!currentEditingUser) return;
+            
+            const amount = parseFloat(document.getElementById('addBalanceAmountInput').value);
+            
+            if (isNaN(amount) || amount <= 0) {
+                alert('❌ Bitte geben Sie einen gültigen Betrag ein!');
+                return;
+            }
+            
+            try {
+                const newBalance = parseFloat(currentEditingUser.balance || 0) + amount;
+                
+                const response = await fetch(`${API_URL}/api/test/user-control/${currentEditingUser.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        field: 'balance',
+                        value: newBalance
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`✅ €${amount.toFixed(2)} erfolgreich hinzugefügt! Neue Balance: €${newBalance.toFixed(2)}`);
+                    loadControlUsers();
+                    closeAddBalanceModal();
+                } else {
+                    alert('❌ Fehler: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Add balance error:', error);
+                alert('❌ Fehler beim Hinzufügen: ' + error.message);
+            }
+        }
+
+        function openQuickDeleteBalance(userId) {
+            const user = allControlUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            currentEditingUser = user;
+            document.getElementById('deleteBalanceUsername').textContent = user.username;
+            document.getElementById('deleteBalanceCurrent').textContent = `€${parseFloat(user.balance || 0).toFixed(2)}`;
+            document.getElementById('deleteBalanceAmountInput').value = '';
+            document.getElementById('deleteBalanceModal').style.display = 'flex';
+        }
+
+        function closeDeleteBalanceModal() {
+            document.getElementById('deleteBalanceModal').style.display = 'none';
+        }
+
+        async function quickDeleteBalance() {
+            if (!currentEditingUser) return;
+            
+            const amount = parseFloat(document.getElementById('deleteBalanceAmountInput').value);
+            
+            if (isNaN(amount) || amount <= 0) {
+                alert('❌ Bitte geben Sie einen gültigen Betrag ein!');
+                return;
+            }
+            
+            const currentBalance = parseFloat(currentEditingUser.balance || 0);
+            const newBalance = Math.max(0, currentBalance - amount);
+            
+            if (amount > currentBalance) {
+                if (!confirm(`⚠️ Der Betrag ist höher als die aktuelle Balance (€${currentBalance.toFixed(2)}). Balance wird auf €0.00 gesetzt. Fortfahren?`)) {
+                    return;
+                }
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/api/test/user-control/${currentEditingUser.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        field: 'balance',
+                        value: newBalance
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`✅ €${amount.toFixed(2)} erfolgreich abgezogen! Neue Balance: €${newBalance.toFixed(2)}`);
+                    loadControlUsers();
+                    closeDeleteBalanceModal();
+                } else {
+                    alert('❌ Fehler: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Delete balance error:', error);
+                alert('❌ Fehler beim Abziehen: ' + error.message);
+            }
+        }
+
+        // Search Control Users
+        document.getElementById('controlSearch')?.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = allControlUsers.filter(user => 
+                user.username.toLowerCase().includes(searchTerm) ||
+                user.email.toLowerCase().includes(searchTerm) ||
+                user.id.toString().includes(searchTerm)
+            );
+            displayControlUsers(filtered);
+        });
+
+        // Deposit Logs Funktionen
+        let allDeposits = [];
+        
+        async function loadDeposits() {
+            const infoBox = document.getElementById('depositSourceInfo');
+            const infoText = document.getElementById('depositSourceText');
+            
+            try {
+                const response = await fetch(`${API_URL}/api/test/deposits`);
+                const data = await response.json();
+                
+                if (data.success && data.deposits) {
+                    console.log('✅ Loaded REAL deposits from database:', data.deposits.length);
+                    allDeposits = data.deposits;
+                    displayDeposits(allDeposits);
+                    
+                    // Show success indicator
+                    infoBox.style.display = 'block';
+                    infoBox.style.background = 'rgba(16, 185, 129, 0.2)';
+                    infoBox.style.borderColor = '#10b981';
+                    infoBox.style.color = '#10b981';
+                    infoText.innerHTML = `✅ ECHTE Deposit-Daten aus Datenbank (${data.deposits.length} Deposits)`;
+                } else {
+                    allDeposits = [];
+                    displayDeposits(allDeposits);
+                    
+                    // Show info
+                    infoBox.style.display = 'block';
+                    infoBox.style.background = 'rgba(245, 158, 11, 0.2)';
+                    infoBox.style.borderColor = '#f59e0b';
+                    infoBox.style.color = '#f59e0b';
+                    infoText.innerHTML = '⚠️ Keine Deposits in der Datenbank gefunden';
+                }
+            } catch (error) {
+                console.error('Error loading deposits:', error);
+                allDeposits = [];
+                displayDeposits(allDeposits);
+                
+                // Show error
+                infoBox.style.display = 'block';
+                infoBox.style.background = 'rgba(239, 68, 68, 0.2)';
+                infoBox.style.borderColor = '#ef4444';
+                infoBox.style.color = '#ef4444';
+                infoText.innerHTML = `❌ Fehler beim Laden: ${error.message}`;
+            }
+        }
+        
+        function displayDeposits(deposits) {
+            const tbody = document.getElementById('depositsTableBody');
+            
+            if (deposits.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #64748b;">
+                            Keine Deposits gefunden
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = deposits.map(deposit => `
+                <tr>
+                    <td>${formatDateTime(deposit.timestamp)}</td>
+                    <td><strong>${deposit.username || 'Unbekannt'}</strong></td>
+                    <td>${deposit.email || '-'}</td>
+                    <td><span class="badge badge-warning">${deposit.crypto_type || 'N/A'}</span></td>
+                    <td><span style="color: #10b981; font-weight: 600;">${parseFloat(deposit.amount || 0).toFixed(8)}</span></td>
+                    <td><code style="font-size: 11px;">${deposit.wallet_address || 'N/A'}</code></td>
+                    <td>
+                        <span class="badge ${getStatusBadge(deposit.status)}">
+                            ${deposit.status || 'unknown'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        function getStatusBadge(status) {
+            const map = {
+                'approved': 'badge-success',
+                'pending': 'badge-warning',
+                'rejected': 'badge-error'
+            };
+            return map[status] || 'badge-warning';
+        }
+        
+        function filterDeposits() {
+            const filterStatus = document.getElementById('depositStatusFilter').value;
+            
+            if (filterStatus === 'all') {
+                displayDeposits(allDeposits);
+            } else {
+                const filtered = allDeposits.filter(d => d.status === filterStatus);
+                displayDeposits(filtered);
+            }
+        }
+
+        // IP Tracking Funktionen
+        let allIpLogs = [];
+        
+        async function loadIpTracking() {
+            const infoBox = document.getElementById('ipSourceInfo');
+            const infoText = document.getElementById('ipSourceText');
+            
+            try {
+                const response = await fetch(`${API_URL}/api/test/ip-tracking`);
+                const data = await response.json();
+                
+                if (data.success && data.ip_logs) {
+                    console.log('✅ Loaded REAL IP tracking from database:', data.ip_logs.length);
+                    allIpLogs = data.ip_logs;
+                    displayIpTracking(allIpLogs);
+                    
+                    const vpnCount = allIpLogs.filter(log => log.uses_vpn).length;
+                    
+                    // Show success indicator
+                    infoBox.style.display = 'block';
+                    infoBox.style.background = 'rgba(16, 185, 129, 0.2)';
+                    infoBox.style.borderColor = '#10b981';
+                    infoBox.style.color = '#10b981';
+                    infoText.innerHTML = `✅ ECHTE IP-Daten aus Datenbank (${data.ip_logs.length} Logs, ${vpnCount} VPN/Proxy)`;
+                } else {
+                    allIpLogs = [];
+                    displayIpTracking(allIpLogs);
+                    
+                    // Show info
+                    infoBox.style.display = 'block';
+                    infoBox.style.background = 'rgba(245, 158, 11, 0.2)';
+                    infoBox.style.borderColor = '#f59e0b';
+                    infoBox.style.color = '#f59e0b';
+                    infoText.innerHTML = '⚠️ Keine IP-Tracking Daten in der Datenbank. IPs werden bei Login/Registrierung geloggt.';
+                }
+            } catch (error) {
+                console.error('Error loading IP tracking:', error);
+                allIpLogs = [];
+                displayIpTracking(allIpLogs);
+                
+                // Show error
+                infoBox.style.display = 'block';
+                infoBox.style.background = 'rgba(239, 68, 68, 0.2)';
+                infoBox.style.borderColor = '#ef4444';
+                infoBox.style.color = '#ef4444';
+                infoText.innerHTML = `❌ Fehler beim Laden: ${error.message}`;
+            }
+        }
+        
+        function displayIpTracking(ipLogs) {
+            const tbody = document.getElementById('ipTrackingTableBody');
+            
+            if (ipLogs.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 40px; color: #64748b;">
+                            Keine IP-Tracking Daten gefunden.<br>
+                            <small style="margin-top: 10px; display: block;">IPs werden automatisch bei Login/Registrierung geloggt.</small>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = ipLogs.map(log => `
+                <tr style="${log.uses_vpn ? 'background: rgba(239, 68, 68, 0.05);' : ''}">
+                    <td>${formatDateTime(log.timestamp)}</td>
+                    <td><strong>${log.username || 'Unbekannt'}</strong></td>
+                    <td>${log.email || '-'}</td>
+                    <td><code style="font-size: 12px;">${log.ip_address}</code></td>
+                    <td>
+                        ${log.country ? `<span style="font-size: 12px;">${log.country}${log.city ? ' / ' + log.city : ''}</span>` : '-'}
+                    </td>
+                    <td><small>${log.isp || '-'}</small></td>
+                    <td>
+                        ${getVpnBadge(log)}
+                    </td>
+                    <td><span class="badge badge-warning">${log.action || 'unknown'}</span></td>
+                </tr>
+            `).join('');
+        }
+        
+        function getVpnBadge(log) {
+            if (log.is_tor) {
+                return '<span class="badge badge-error"><i class="fas fa-user-secret"></i> TOR</span>';
+            }
+            if (log.is_vpn) {
+                return '<span class="badge badge-error"><i class="fas fa-shield-alt"></i> VPN</span>';
+            }
+            if (log.is_proxy) {
+                return '<span class="badge badge-error"><i class="fas fa-network-wired"></i> Proxy</span>';
+            }
+            return '<span class="badge badge-success"><i class="fas fa-check"></i> Clean</span>';
+        }
+        
+        function filterIpLogs() {
+            const filterVpn = document.getElementById('ipVpnFilter').value;
+            
+            if (filterVpn === 'all') {
+                displayIpTracking(allIpLogs);
+            } else if (filterVpn === 'vpn') {
+                const filtered = allIpLogs.filter(log => log.uses_vpn);
+                displayIpTracking(filtered);
+            } else if (filterVpn === 'clean') {
+                const filtered = allIpLogs.filter(log => !log.uses_vpn);
+                displayIpTracking(filtered);
+            }
+        }
+
+        // Logs Funktionen
+        async function loadLogs() {
+            const infoBox = document.getElementById('logSourceInfo');
+            const infoText = document.getElementById('logSourceText');
+            
+            try {
+                // Try test endpoint first (no auth needed)
+                const testResponse = await fetch(`${API_URL}/api/test/logs`);
+                const testData = await testResponse.json();
+                
+                if (testData.success && testData.logs && testData.logs.length > 0) {
+                    console.log('✅ Loaded REAL logs from database:', testData.logs.length);
+                    allLogs = testData.logs;
+                    displayLogs(allLogs);
+                    document.getElementById('totalLogins').textContent = allLogs.filter(l => l.event === 'login').length;
+                    
+                    // Show success indicator
+                    infoBox.style.display = 'block';
+                    infoBox.style.background = 'rgba(16, 185, 129, 0.2)';
+                    infoBox.style.borderColor = '#10b981';
+                    infoBox.style.color = '#10b981';
+                    infoText.innerHTML = `✅ ECHTE Auth-Logs aus Datenbank (${testData.logs.length} Events)`;
+                    return;
+                }
+                
+                // Fallback: Try auth endpoint
+                const response = await fetch(`${API_URL}/api/admin/logs`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success && data.logs && data.logs.length > 0) {
+                    allLogs = data.logs;
+                    displayLogs(allLogs);
+                    document.getElementById('totalLogins').textContent = allLogs.filter(l => l.event === 'login').length;
+                    
+                    infoBox.style.display = 'block';
+                    infoBox.style.background = 'rgba(16, 185, 129, 0.2)';
+                    infoBox.style.borderColor = '#10b981';
+                    infoBox.style.color = '#10b981';
+                    infoText.innerHTML = `✅ ECHTE Auth-Logs aus Datenbank (${data.logs.length} Events)`;
+                } else {
+                    // No logs found
+                    console.warn('⚠️ No auth logs found in database');
+                    allLogs = [];
+                    displayLogs(allLogs);
+                    document.getElementById('totalLogins').textContent = 0;
+                    
+                    infoBox.style.display = 'block';
+                    infoBox.style.background = 'rgba(245, 158, 11, 0.2)';
+                    infoBox.style.borderColor = '#f59e0b';
+                    infoBox.style.color = '#f59e0b';
+                    infoText.innerHTML = '⚠️ Keine Auth-Logs in Datenbank (auth_logs Tabelle leer oder nicht vorhanden)';
+                }
+            } catch (error) {
+                console.error('Error loading logs:', error);
+                allLogs = [];
+                displayLogs(allLogs);
+                document.getElementById('totalLogins').textContent = 0;
+                
+                infoBox.style.display = 'block';
+                infoBox.style.background = 'rgba(239, 68, 68, 0.2)';
+                infoBox.style.borderColor = '#ef4444';
+                infoBox.style.color = '#ef4444';
+                infoText.innerHTML = `❌ Fehler beim Laden: ${error.message}`;
+            }
+        }
+
+        function generateDemoLogs() {
+            const events = ['login', 'register', 'login', 'failed_login', 'register'];
+            const users = ['demo_user1', 'crypto_trader', 'investor_pro', 'newbie_2025', 'whale_investor'];
+            const ips = ['192.168.1.100', '192.168.1.101', '192.168.1.102', '10.0.0.50', '172.16.0.20'];
+            
+            return Array.from({ length: 20 }, (_, i) => ({
+                id: i + 1,
+                timestamp: new Date(Date.now() - Math.random() * 86400000 * 7).toISOString(),
+                event: events[Math.floor(Math.random() * events.length)],
+                username: users[Math.floor(Math.random() * users.length)],
+                email: `${users[Math.floor(Math.random() * users.length)]}@example.com`,
+                password: '********',
+                ip_address: ips[Math.floor(Math.random() * ips.length)],
+                status: Math.random() > 0.2 ? 'success' : 'failed'
+            }));
+        }
+
+        function displayLogs(logs) {
+            const tbody = document.getElementById('logsTableBody');
+            
+            if (!logs || logs.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #64748b;">
+                            Keine Auth-Logs in der Datenbank
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = logs.map(log => `
+                <tr>
+                    <td>${formatDateTime(log.timestamp)}</td>
+                    <td>
+                        <span class="badge ${getBadgeClass(log.event)}">
+                            ${log.event.toUpperCase()}
+                        </span>
+                    </td>
+                    <td><strong>${log.username}</strong></td>
+                    <td>${log.email}</td>
+                    <td><code>${log.password}</code></td>
+                    <td><code>${log.ip_address}</code></td>
+                    <td>
+                        <span class="badge ${log.status === 'success' ? 'badge-success' : 'badge-error'}">
+                            ${log.status}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterLogs() {
+            const filterType = document.getElementById('logTypeFilter').value;
+            
+            if (filterType === 'all') {
+                displayLogs(allLogs);
+            } else {
+                const filtered = allLogs.filter(log => {
+                    if (filterType === 'failed') return log.status === 'failed';
+                    return log.event === filterType;
+                });
+                displayLogs(filtered);
+            }
+        }
+
+        // Helper Funktionen
+        function getBadgeClass(event) {
+            const map = {
+                'login': 'badge-success',
+                'register': 'badge-warning',
+                'failed_login': 'badge-error'
+            };
+            return map[event] || 'badge-warning';
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('de-DE');
+        }
+
+        function formatDateTime(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleString('de-DE');
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function changeAdminPassword() {
+            const newPassword = document.getElementById('newAdminPassword').value;
+            if (!newPassword || newPassword.length < 6) {
+                alert('❌ Passwort muss mindestens 6 Zeichen lang sein!');
+                return;
+            }
+            alert('✅ Passwort erfolgreich geändert! (In Produktion würde dies im Backend gespeichert)');
+            document.getElementById('newAdminPassword').value = '';
+        }
+
+        // Monitoring Funktionen
+        function addLog(message, type = 'info', icon = 'info-circle') {
+            const logContainer = document.getElementById('logContainer');
+            const now = new Date().toLocaleTimeString('de-DE');
+            
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            
+            const iconColors = {
+                success: '#10b981',
+                error: '#ef4444',
+                warning: '#f59e0b',
+                info: '#3b82f6'
+            };
+            
+            entry.innerHTML = `
+                <i class="fas fa-${icon}" style="color: ${iconColors[type]};"></i>
+                <span class="timestamp">[${now}]</span>
+                <span>${message}</span>
+            `;
+            
+            logContainer.insertBefore(entry, logContainer.firstChild);
+            
+            while (logContainer.children.length > 100) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+        }
+
+        function updateStats() {
+            if (startTime) {
+                const uptime = Math.floor((Date.now() - startTime) / 1000);
+                const hours = Math.floor(uptime / 3600);
+                const minutes = Math.floor((uptime % 3600) / 60);
+                const seconds = uptime % 60;
+                document.getElementById('uptime').textContent = 
+                    `${hours}h ${minutes}m ${seconds}s`;
+            }
+        }
+
+        async function pingBackend() {
+            addLog('Sende Health-Check an Backend...', 'info', 'paper-plane');
+            
+            try {
+                const start = Date.now();
+                const response = await fetch(`${API_URL}/api/health`);
+                const responseTime = Date.now() - start;
+                
+                if (response.ok) {
+                    pingCount++;
+                    successCount++;
+                    document.getElementById('pingCount').textContent = pingCount;
+                    addLog(`Backend antwortet erfolgreich! Response-Zeit: ${responseTime}ms`, 'success', 'check-circle');
+                }
+            } catch (error) {
+                addLog(`Verbindungsfehler: ${error.message}`, 'error', 'times-circle');
+            }
+            
+            addLog(`Nächster Ping in 10 Minuten...`, 'info', 'clock');
+        }
+
+        function startMonitoring() {
+            if (monitoringInterval) return;
+            
+            startTime = Date.now();
+            
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'inline-flex';
+            document.getElementById('serviceStatus').innerHTML = 
+                '<i class="fas fa-play-circle"></i> Service Status: <span class="badge badge-success">Aktiv</span>';
+            
+            addLog('Keep-Alive Service erfolgreich gestartet! 🚀', 'success', 'rocket');
+            pingBackend();
+            monitoringInterval = setInterval(pingBackend, PING_INTERVAL);
+        }
+
+        function stopMonitoring() {
+            if (!monitoringInterval) return;
+            
+            clearInterval(monitoringInterval);
+            monitoringInterval = null;
+            startTime = null;
+            
+            document.getElementById('startBtn').style.display = 'inline-flex';
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('serviceStatus').innerHTML = 
+                '<i class="fas fa-pause-circle"></i> Service Status: <span class="badge badge-warning">Gestoppt</span>';
+            
+            addLog('Keep-Alive Service wurde gestoppt.', 'warning', 'stop-circle');
+        }
+
+        // Search Funktionen
+        document.addEventListener('DOMContentLoaded', () => {
+            const userSearch = document.getElementById('userSearch');
+            if (userSearch) {
+                userSearch.addEventListener('input', (e) => {
+                    const query = e.target.value.toLowerCase();
+                    const filtered = allUsers.filter(user => 
+                        user.username.toLowerCase().includes(query) ||
+                        user.email.toLowerCase().includes(query) ||
+                        user.id.toString().includes(query)
+                    );
+                    displayUsers(filtered);
+                });
+            }
+            
+            const depositSearch = document.getElementById('depositSearch');
+            if (depositSearch) {
+                depositSearch.addEventListener('input', (e) => {
+                    const query = e.target.value.toLowerCase();
+                    const filtered = allDeposits.filter(deposit => 
+                        (deposit.username && deposit.username.toLowerCase().includes(query)) ||
+                        (deposit.email && deposit.email.toLowerCase().includes(query)) ||
+                        (deposit.wallet_address && deposit.wallet_address.toLowerCase().includes(query)) ||
+                        deposit.id.toString().includes(query)
+                    );
+                    displayDeposits(filtered);
+                });
+            }
+            
+            const ipSearch = document.getElementById('ipSearch');
+            if (ipSearch) {
+                ipSearch.addEventListener('input', (e) => {
+                    const query = e.target.value.toLowerCase();
+                    const filtered = allIpLogs.filter(log => 
+                        (log.username && log.username.toLowerCase().includes(query)) ||
+                        (log.email && log.email.toLowerCase().includes(query)) ||
+                        (log.ip_address && log.ip_address.includes(query)) ||
+                        (log.country && log.country.toLowerCase().includes(query)) ||
+                        (log.city && log.city.toLowerCase().includes(query))
+                    );
+                    displayIpTracking(filtered);
+                });
+            }
+            
+            const logSearch = document.getElementById('logSearch');
+            if (logSearch) {
+                logSearch.addEventListener('input', (e) => {
+                    const query = e.target.value.toLowerCase();
+                    const filtered = allLogs.filter(log => 
+                        (log.username && log.username.toLowerCase().includes(query)) ||
+                        (log.email && log.email.toLowerCase().includes(query)) ||
+                        (log.ip_address && log.ip_address.includes(query))
+                    );
+                    displayLogs(filtered);
+                });
+            }
+        });
+
+        // Tab-Schließen Warnung
+        window.addEventListener('beforeunload', (e) => {
+            if (monitoringInterval) {
+                e.preventDefault();
+                e.returnValue = 'Der Keep-Alive Service läuft noch. Wirklich schließen?';
+            }
+        });
+    </script>
+</body>
+</html>

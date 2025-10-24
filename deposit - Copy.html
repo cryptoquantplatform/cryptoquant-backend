@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit - CryptoQuant</title>
+    <link rel="stylesheet" href="pages-styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <div class="header-top">
+                <div class="header-logo-section">
+                    <a href="index.html" class="page-logo">CryptoQuant</a>
+                    <div>
+                        <h1>Deposit Crypto</h1>
+                        <p class="page-subtitle">Add funds to your CryptoQuant account. Minimum deposit: 75€</p>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+            
+            <!-- Navigation Links -->
+            <nav class="page-nav">
+                <a href="dashboard.html" class="page-nav-link">📊 Dashboard</a>
+                <a href="quantification.html" class="page-nav-link">💎 Quantification</a>
+                <a href="deposit.html" class="page-nav-link active">💰 Deposit</a>
+                <a href="withdraw.html" class="page-nav-link">💸 Withdraw</a>
+                <a href="team.html" class="page-nav-link">👥 Team</a>
+                <a href="about.html" class="page-nav-link">ℹ️ About</a>
+            </nav>
+        </div>
+
+        <div class="content-grid">
+            <div class="main-content">
+                <!-- Auto-Refresh Banner -->
+                <div class="card" style="background: linear-gradient(135deg, rgba(52, 199, 89, 0.1) 0%, rgba(48, 209, 88, 0.05) 100%); border: 2px solid rgba(52, 199, 89, 0.3);">
+                    <h2 style="color: #34c759;">✨ Automatic Deposit Detection</h2>
+                    <p style="margin: 10px 0;">Your balance will be updated <strong>automatically</strong> when crypto arrives at your addresses below.</p>
+                    <button onclick="checkForTransactions()" class="quick-amount-btn" style="background: rgba(52, 199, 89, 0.2); border: 1px solid rgba(52, 199, 89, 0.4); color: #34c759; margin-top: 10px;">
+                        🔄 Check Now for New Deposits
+                    </button>
+                </div>
+
+                <!-- Pending Transactions -->
+                <div class="card" id="pendingTxCard" style="display: none; background: rgba(255, 204, 0, 0.1); border: 2px solid rgba(255, 204, 0, 0.3);">
+                    <h2 style="color: #ffcc00;">⏳ Pending Deposits</h2>
+                    <div id="pendingTransactions"></div>
+                </div>
+
+                <!-- Your Unique Deposit Addresses -->
+                <div class="card">
+                    <h2>💎 Your Personal Deposit Addresses</h2>
+                    <p style="margin-bottom: 20px; color: rgba(255,255,255,0.7);">
+                        These addresses are <strong>uniquely yours</strong>. Send crypto to any of them and your balance will update automatically!
+                    </p>
+                    
+                    <!-- Address Cards Container -->
+                    <div id="addressesContainer" style="display: grid; gap: 20px;">
+                        <p style="text-align: center; padding: 40px; color: rgba(255,255,255,0.5);">
+                            Loading your deposit addresses...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Instructions -->
+                <div class="card">
+                    <h3>📖 How to Deposit:</h3>
+                    <div class="deposit-instructions">
+                        <ol style="line-height: 2;">
+                            <li><strong>Choose your crypto</strong> from the addresses above (ETH, USDT, BTC, or SOL)</li>
+                            <li><strong>Copy the address</strong> or scan the QR code</li>
+                            <li><strong>Send crypto</strong> from your wallet (minimum 75€)</li>
+                            <li><strong>Wait 30 seconds to 30 minutes</strong> for blockchain confirmations (SOL is fastest!)</li>
+                            <li><strong>Balance updates automatically</strong> - no need to submit forms!</li>
+                        </ol>
+                        <p style="margin-top: 20px; padding: 15px; background: rgba(255, 59, 48, 0.1); border: 1px solid rgba(255, 59, 48, 0.3); border-radius: 8px; color: #ff3b30;">
+                            ⚠️ <strong>Important:</strong> Make sure to send the correct crypto to the matching address! For example, only send USDT to the USDT address, ETH to the ETH address, etc.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="info-card">
+                    <h3>Deposit Information</h3>
+                    <div class="info-item">
+                        <span class="info-label">Minimum Deposit</span>
+                        <span class="info-value">75€</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Processing Time</span>
+                        <span class="info-value">5-15 minutes</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Network Fee</span>
+                        <span class="info-value">Paid by sender</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Confirmations</span>
+                        <span class="info-value">1 confirmation</span>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3>Recent Deposits</h3>
+                    <div class="transactions-list" id="recentDeposits">
+                        <p class="no-transactions">No recent deposits</p>
+                    </div>
+                </div>
+
+                <div class="info-card support">
+                    <h3>Need Help?</h3>
+                    <p>If you have any issues with your deposit, please contact our support team.</p>
+                    <button class="support-btn">Contact Support</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="api-config.js"></script>
+    <script src="deposit-auto.js"></script>
+    <script src="notifications.js"></script>
+    <!-- logout() function is defined globally in api-config.js -->
+</body>
+</html>
+

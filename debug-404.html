@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 Debug - CryptoQuant</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+            color: white;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .box {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .success { border-color: #34c759; background: rgba(52,199,89,0.1); }
+        .error { border-color: #ff3b30; background: rgba(255,59,48,0.1); }
+        .warning { border-color: #ffcc00; background: rgba(255,204,0,0.1); }
+        button {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        button:active { opacity: 0.8; }
+        .info {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            word-wrap: break-word;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 5px solid;
+        }
+        .result.ok { border-color: #34c759; background: rgba(52,199,89,0.2); }
+        .result.fail { border-color: #ff3b30; background: rgba(255,59,48,0.2); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 404 Debug Tool</h1>
+
+        <div class="box">
+            <h2>📊 System-Info</h2>
+            <div class="info">
+                <div>🌐 <strong>Hostname:</strong> <span id="hostname">-</span></div>
+                <div>📍 <strong>URL:</strong> <span id="url">-</span></div>
+                <div>💻 <strong>Browser:</strong> <span id="browser">-</span></div>
+                <div>📱 <strong>Gerät:</strong> <span id="device">-</span></div>
+            </div>
+        </div>
+
+        <div class="box">
+            <h2>🧪 API-Konfiguration</h2>
+            <div id="apiInfo" class="info">Lade...</div>
+        </div>
+
+        <div class="box">
+            <h2>🔌 Backend-Test</h2>
+            <button onclick="testBackend()">Backend jetzt testen</button>
+            <div id="backendResult"></div>
+        </div>
+
+        <div class="box">
+            <h2>📄 Seiten-Tests</h2>
+            <button onclick="testAllPages()">Alle Seiten testen</button>
+            <div id="pagesResult"></div>
+        </div>
+
+        <div class="box">
+            <h2>🔄 Schnell-Fixes</h2>
+            <button onclick="clearCacheAndReload()">Cache leeren & neu laden</button>
+            <button onclick="window.location.href='https://cryptoquant.info/dashboard.html'">
+                Direkt zu Dashboard
+            </button>
+            <button onclick="window.location.href='https://cryptoquant.info/admin-login.html'">
+                Direkt zu Admin-Login
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cryptoquant.info/api-config.js"></script>
+    <script>
+        // System Info anzeigen
+        window.addEventListener('load', () => {
+            document.getElementById('hostname').textContent = window.location.hostname;
+            document.getElementById('url').textContent = window.location.href;
+            document.getElementById('browser').textContent = navigator.userAgent;
+            
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            document.getElementById('device').textContent = isMobile ? '📱 Mobil' : '💻 Desktop';
+
+            // API Info
+            setTimeout(() => {
+                try {
+                    const isLocal = window.location.hostname === 'localhost' || 
+                                   window.location.hostname === '127.0.0.1' || 
+                                   window.location.hostname.includes('192.168');
+                    
+                    const apiUrl = typeof API_URL !== 'undefined' ? API_URL : 'NICHT GELADEN!';
+                    
+                    document.getElementById('apiInfo').innerHTML = `
+                        <div><strong>Erkannte Umgebung:</strong> ${isLocal ? '🏠 LOKAL' : '🌍 PRODUKTION'}</div>
+                        <div><strong>API-URL:</strong> ${apiUrl}</div>
+                        <div><strong>API_URL definiert:</strong> ${typeof API_URL !== 'undefined' ? '✅ JA' : '❌ NEIN'}</div>
+                    `;
+                } catch (e) {
+                    document.getElementById('apiInfo').innerHTML = `
+                        <div style="color: #ff3b30;"><strong>❌ FEHLER:</strong> ${e.message}</div>
+                        <div><strong>api-config.js wurde nicht geladen!</strong></div>
+                    `;
+                }
+            }, 500);
+
+            // Auto-test
+            setTimeout(() => testBackend(), 1000);
+        });
+
+        async function testBackend() {
+            const resultDiv = document.getElementById('backendResult');
+            resultDiv.innerHTML = '<div class="result" style="background: rgba(94,92,230,0.2); border-color: #5e5ce6;">⏳ Teste Backend...</div>';
+
+            try {
+                const apiUrl = typeof API_URL !== 'undefined' ? API_URL : 'https://cryptoquant-api.onrender.com/api';
+                const response = await fetch(apiUrl + '/health');
+                const data = await response.json();
+
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="result ok">
+                            <strong>✅ BACKEND FUNKTIONIERT!</strong><br>
+                            Message: ${data.message}<br>
+                            Zeit: ${new Date(data.timestamp).toLocaleString('de-DE')}<br>
+                            URL: ${apiUrl}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="result fail">❌ Backend antwortet mit Fehler</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result fail">
+                        <strong>❌ BACKEND NICHT ERREICHBAR!</strong><br>
+                        Fehler: ${error.message}<br><br>
+                        <strong>Mögliche Gründe:</strong><br>
+                        • Backend schläft (Render.com Free Tier)<br>
+                        • Netzwerkproblem<br>
+                        • CORS-Fehler<br><br>
+                        <button onclick="window.open('https://cryptoquant-api.onrender.com/api/health', '_blank')" 
+                                style="width: auto; padding: 10px 20px; margin: 10px 0;">
+                            Backend aufwecken
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        async function testAllPages() {
+            const resultDiv = document.getElementById('pagesResult');
+            resultDiv.innerHTML = '<div class="result" style="background: rgba(94,92,230,0.2); border-color: #5e5ce6;">⏳ Teste alle Seiten...</div>';
+
+            const pages = [
+                'index.html',
+                'dashboard.html',
+                'admin-login.html',
+                'deposit.html',
+                'withdraw.html',
+                'team.html',
+                'api-config.js',
+                'admin.js'
+            ];
+
+            let results = '<div>';
+            
+            for (const page of pages) {
+                try {
+                    const response = await fetch(`https://cryptoquant.info/${page}`, { method: 'HEAD' });
+                    if (response.ok) {
+                        results += `<div class="result ok" style="padding: 10px; margin: 5px 0;">✅ ${page}</div>`;
+                    } else {
+                        results += `<div class="result fail" style="padding: 10px; margin: 5px 0;">❌ ${page} - Status: ${response.status}</div>`;
+                    }
+                } catch (error) {
+                    results += `<div class="result fail" style="padding: 10px; margin: 5px 0;">❌ ${page} - Fehler: ${error.message}</div>`;
+                }
+            }
+
+            results += '</div>';
+            resultDiv.innerHTML = results;
+        }
+
+        function clearCacheAndReload() {
+            if (confirm('Cache leeren und Seite neu laden?')) {
+                // Try to clear cache
+                if ('caches' in window) {
+                    caches.keys().then(names => {
+                        names.forEach(name => caches.delete(name));
+                    });
+                }
+                
+                // Reload without cache
+                window.location.reload(true);
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
+

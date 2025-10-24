@@ -1,0 +1,29 @@
+@echo off
+echo ========================================
+echo    COMPILING UPDATED LOGIN SYSTEM
+echo ========================================
+echo.
+echo Adding transparent minimize and close buttons...
+echo.
+echo Setting up environment...
+call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
+echo.
+echo Environment set up! Now compiling...
+echo.
+echo Compiling updated login system...
+cl /EHsc login_app.cpp imgui-master\imgui.cpp imgui-master\imgui_draw.cpp imgui-master\imgui_tables.cpp imgui-master\imgui_widgets.cpp imgui-master\backends\imgui_impl_win32.cpp imgui-master\backends\imgui_impl_dx11.cpp /I"imgui-master" /I"imgui-master\backends" /Fe:UpdatedLogin.exe /link d3d11.lib dxgi.lib
+echo.
+if exist UpdatedLogin.exe (
+    echo SUCCESS! Created UpdatedLogin.exe!
+    echo This has transparent window controls and proper dragging!
+    echo.
+    echo File size:
+    dir UpdatedLogin.exe
+    echo.
+    echo Running the updated login system...
+    UpdatedLogin.exe
+) else (
+    echo Compilation failed. Let me check what went wrong...
+)
+echo.
+pause

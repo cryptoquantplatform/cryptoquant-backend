@@ -257,15 +257,8 @@ exports.performClick = async (req, res) => {
 
         const user = userResult.rows[0];
 
-        // Check minimum balance
-        if (parseFloat(user.balance) < 1) {
-            await client.query('ROLLBACK');
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Minimum balance of 75€ required to start earning' 
-            });
-        }
-
+        // No minimum balance required - accept any amount!
+        
         // Get TOTAL referral count (entire pyramid, not just direct!)
         const totalReferrals = await countTotalReferrals(userId);
         const levelInfo = calculateUserLevel(totalReferrals);

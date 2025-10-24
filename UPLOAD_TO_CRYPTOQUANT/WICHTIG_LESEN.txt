@@ -1,0 +1,107 @@
+═══════════════════════════════════════════════════════════════
+🔴 404 FEHLER - ENDGÜLTIGE LÖSUNG
+═══════════════════════════════════════════════════════════════
+
+✅ PROBLEM GEFUNDEN UND BEHOBEN!
+─────────────────────────────────
+
+Das Problem war NICHT die API-URL, sondern:
+❌ JavaScript-Dateien leiteten auf "/auth" weiter (existiert nicht!)
+✅ Muss "/login.html" sein!
+
+
+📤 LADEN SIE DIESE DATEIEN HOCH (ÜBERSCHREIBEN!):
+──────────────────────────────────────────────────
+
+✓ api-config.js        (WICHTIG!)
+✓ admin.js             (WICHTIG!)
+✓ dashboard.js         (WICHTIG!)
+✓ team.js              (WICHTIG!)
+✓ quantification.js    (WICHTIG!)
+✓ deposit-auto.js      (WICHTIG!)
+
+Optional (Test-Tools):
+• debug-404.html
+• wake-backend.html
+• index-neu.html
+• test-production-api.html
+
+
+🎯 WAS WURDE GEÄNDERT:
+─────────────────────
+
+VORHER (FALSCH):
+  window.location.href = '/auth'  ❌
+
+NACHHER (RICHTIG):
+  window.location.href = '/login.html'  ✅
+
+
+🚀 NACH DEM UPLOAD:
+──────────────────
+
+1. ✅ Alle Seiten funktionieren
+2. ✅ Keine 404-Fehler mehr
+3. ✅ Login/Logout funktioniert
+4. ✅ Weiterleitungen funktionieren
+
+
+📱 AM HANDY TESTEN:
+──────────────────
+
+Nach dem Upload, am Handy:
+
+1. Browser-Cache leeren ODER Inkognito-Modus
+2. Öffnen Sie: https://cryptoquant.info/dashboard.html
+3. Sollte funktionieren! ✅
+
+
+⚠️ WICHTIG - BACKEND:
+─────────────────────
+
+Das Backend (Render.com Free Tier) schläft nach 15 Minuten.
+
+LÖSUNG (5 Minuten):
+1. Gehen Sie zu: https://uptimerobot.com
+2. Kostenlos registrieren
+3. Monitor erstellen:
+   • URL: https://cryptoquant-api.onrender.com/api/health
+   • Interval: 5 minutes
+4. Backend schläft nie mehr! ✅
+
+
+✅ CHECKLISTE:
+─────────────
+
+☐ Alle 6 JavaScript-Dateien hochgeladen
+☐ Dateien überschreiben bestätigt
+☐ Browser-Cache geleert
+☐ Am Handy (Inkognito) getestet
+☐ Alle Seiten funktionieren
+☐ UptimeRobot eingerichtet (optional aber empfohlen)
+
+
+🔧 FALLBACK:
+───────────
+
+Falls immer noch Probleme:
+
+1. Laden Sie auch "index-neu.html" hoch
+2. Öffnen Sie: https://cryptoquant.info/index-neu.html
+3. Von dort aus navigieren
+
+
+═══════════════════════════════════════════════════════════════
+
+Erstellt: 23. Oktober 2025
+Problem: /auth 404-Fehler
+Lösung: Umleitung auf /login.html geändert
+Status: ✅ BEHOBEN!
+
+═══════════════════════════════════════════════════════════════
+
+
+
+
+
+

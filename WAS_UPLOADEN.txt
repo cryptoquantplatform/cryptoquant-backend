@@ -1,0 +1,76 @@
+═══════════════════════════════════════════════════════════
+🚀 WAS SIE AUF NAMECHEAP UPLOADEN MÜSSEN
+═══════════════════════════════════════════════════════════
+
+📁 DIESE DATEI:
+-----------------------------------------------------------
+keep-backend-alive.html
+-----------------------------------------------------------
+
+📍 WO LIEGT DIE DATEI:
+C:\Users\j\Downloads\imgui-master\imgui-master\keep-backend-alive.html
+
+
+📤 UPLOAD-SCHRITTE:
+-----------------------------------------------------------
+1. Namecheap einloggen → cPanel öffnen
+2. "File Manager" klicken
+3. Zu "public_html" navigieren
+4. "Upload" Button klicken
+5. Datei "keep-backend-alive.html" auswählen
+6. Warten bis Upload fertig (100%)
+7. Optional: Umbenennen zu "admin.html"
+-----------------------------------------------------------
+
+
+🌐 DANN ERREICHBAR UNTER:
+https://ihre-domain.com/keep-backend-alive.html
+ODER (wenn umbenannt):
+https://ihre-domain.com/admin.html
+
+
+🔐 ADMIN LOGIN:
+Passwort: admin123
+
+
+═══════════════════════════════════════════════════════════
+⚠️ FÜR ECHTE DATEN (nicht nur Demo):
+═══════════════════════════════════════════════════════════
+
+Sie müssen auch das BACKEND auf Render.com aktualisieren!
+
+1. Führen Sie aus (auf Render.com):
+   cd backend
+   node scripts/createAuthLogsTable.js
+
+2. Deployen Sie diese Dateien auf Render.com:
+   - backend/controllers/adminController.js  ✅ AKTUALISIERT
+   - backend/server.js                       ✅ AKTUALISIERT
+   - backend/scripts/createAuthLogsTable.js  ✅ NEU
+
+   ODER einfach:
+   cd C:\Users\j\Downloads\imgui-master\imgui-master\backend
+   git add .
+   git commit -m "Add admin panel endpoints"
+   git push
+
+   → Render.com deployt automatisch!
+
+
+═══════════════════════════════════════════════════════════
+📖 Detaillierte Anleitung:
+═══════════════════════════════════════════════════════════
+Siehe: ADMIN_PANEL_DEPLOYMENT.md
+
+
+═══════════════════════════════════════════════════════════
+✅ FERTIG!
+═══════════════════════════════════════════════════════════
+
+Nach dem Upload auf Namecheap:
+✅ Admin-Panel funktioniert sofort (mit Demo-Daten)
+✅ Nach Backend-Update: Zeigt ECHTE User-Daten!
+
+
+
+

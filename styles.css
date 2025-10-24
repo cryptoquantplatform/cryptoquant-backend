@@ -1,0 +1,453 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+    min-height: 100vh;
+    color: white;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 100%;
+    margin: 0 auto;
+    min-height: 100vh;
+    position: relative;
+    padding: 20px;
+}
+
+@media (min-width: 768px) {
+    .container {
+        max-width: 1200px;
+        padding: 40px;
+    }
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 30px;
+}
+
+.header-icons {
+    display: flex;
+    gap: 15px;
+}
+
+.icon-item {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.icon-item:hover {
+    transform: scale(1.1);
+}
+
+/* Hero Section */
+.hero-section {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+@media (min-width: 768px) {
+    .hero-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 60px;
+        margin-bottom: 60px;
+    }
+}
+
+.logo-container {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+.logo-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.6) 0%, rgba(59, 130, 246, 0) 70%);
+    filter: blur(20px);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+}
+
+.logo {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-text h1 {
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #e2e8f0;
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .hero-text h1 {
+        font-size: 32px;
+        text-align: left;
+        line-height: 1.4;
+    }
+    
+    .logo-container {
+        margin-bottom: 0;
+    }
+    
+    .logo svg {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .logo-glow {
+        width: 180px;
+        height: 180px;
+    }
+}
+
+/* Welfare Banner */
+.welfare-banner {
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+@media (min-width: 768px) {
+    .welfare-banner {
+        padding: 18px 24px;
+        border-radius: 16px;
+        margin-bottom: 30px;
+    }
+}
+
+.welfare-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.welfare-text {
+    font-size: 13px;
+    color: white;
+    font-weight: 500;
+}
+
+@media (min-width: 768px) {
+    .welfare-text {
+        font-size: 16px;
+    }
+    
+    .welfare-content svg {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+.invite-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: white;
+    font-size: 12px;
+}
+
+.invite-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.status-label {
+    background: rgba(34, 197, 94, 0.9);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    margin-left: 8px;
+    font-weight: 500;
+}
+
+/* DCPTG Card */
+.dcptg-card {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+@media (min-width: 768px) {
+    .dcptg-card {
+        padding: 30px;
+        border-radius: 20px;
+        margin-bottom: 40px;
+    }
+}
+
+.dcptg-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+    transform: rotate(45deg);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card-logo {
+    display: flex;
+    align-items: center;
+}
+
+.card-icon {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    letter-spacing: 1px;
+}
+
+@media (min-width: 768px) {
+    .card-icon {
+        font-size: 20px;
+        padding: 12px 24px;
+    }
+}
+
+.earn-btn {
+    background: rgba(255, 255, 255, 0.25);
+    border: none;
+    border-radius: 20px;
+    padding: 10px 16px;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 500;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 768px) {
+    .earn-btn {
+        font-size: 14px;
+        padding: 12px 20px;
+    }
+}
+
+.earn-btn:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: translateX(2px);
+}
+
+/* Statistics Section */
+.stats-section {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+@media (min-width: 768px) {
+    .stats-section {
+        gap: 25px;
+        margin-bottom: 140px;
+    }
+}
+
+.stat-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 16px 12px;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+@media (min-width: 768px) {
+    .stat-item {
+        padding: 24px 20px;
+        border-radius: 16px;
+    }
+}
+
+.stat-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+}
+
+.stat-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #e2e8f0;
+    margin-bottom: 6px;
+}
+
+@media (min-width: 768px) {
+    .stat-value {
+        font-size: 22px;
+        margin-bottom: 8px;
+    }
+}
+
+.stat-change {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+@media (min-width: 768px) {
+    .stat-change {
+        font-size: 14px;
+    }
+}
+
+.stat-change.positive {
+    color: #22c55e;
+}
+
+.stat-change.negative {
+    color: #ef4444;
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 20px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 374px;
+    width: calc(100% - 40px);
+}
+
+@media (min-width: 768px) {
+    .bottom-nav {
+        position: static;
+        transform: none;
+        max-width: 100%;
+        width: 100%;
+        padding: 30px 20px;
+        gap: 30px;
+        border-radius: 24px;
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.nav-item:hover {
+    transform: translateY(-3px);
+}
+
+.nav-item span {
+    font-size: 11px;
+    color: #cbd5e1;
+    font-weight: 500;
+}
+
+@media (min-width: 768px) {
+    .nav-item span {
+        font-size: 14px;
+    }
+    
+    .nav-icon svg {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+.nav-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s;
+}
+
+.nav-icon:hover {
+    transform: scale(1.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 414px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .hero-text h1 {
+        font-size: 16px;
+    }
+    
+    .stat-value {
+        font-size: 14px;
+    }
+    
+    .nav-item span {
+        font-size: 10px;
+    }
+}
+
+/* Additional polish */
+button {
+    font-family: inherit;
+}
+
+svg {
+    display: block;
+}
+

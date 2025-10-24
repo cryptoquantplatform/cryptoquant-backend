@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit - Wie Rainbet/Stake</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .currency-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .currency-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .currency-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .currency-btn.active {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .currency-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .currency-name {
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .deposit-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+
+        .deposit-card.active {
+            display: block;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .qr-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .qr-code {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            display: inline-block;
+            margin: 20px 0;
+        }
+
+        .address-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .address-label {
+            color: #94a3b8;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .address-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .address-text {
+            flex: 1;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            background: #3b82f6;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #2563eb;
+            transform: scale(1.05);
+        }
+
+        .warning-box {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .warning-box ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .warning-box li {
+            margin-bottom: 8px;
+            color: #fbbf24;
+        }
+
+        .recent-transactions {
+            margin-top: 40px;
+        }
+
+        .tx-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tx-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .tx-status.confirmed {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .tx-status.pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-wallet"></i> Deposit</h1>
+
+        <div class="currency-selector">
+            <div class="currency-btn active" data-currency="BTC">
+                <div class="currency-icon">₿</div>
+                <div class="currency-name">Bitcoin</div>
+                <div style="color: #94a3b8; font-size: 0.9em;">BTC</div>
+            </div>
+            <div class="currency-btn" data-currency="ETH">
+                <div class="currency-icon">Ξ</div>
+                <div class="currency-name">Ethereum</div>
+                <div style="color: #94a3b8; font-size: 0.9em;">ETH</div>
+            </div>
+            <div class="currency-btn" data-currency="USDT">
+                <div class="currency-icon">₮</div>
+                <div class="currency-name">Tether</div>
+                <div style="color: #94a3b8; font-size: 0.9em;">USDT</div>
+            </div>
+        </div>
+
+        <div class="deposit-card active" id="depositCard">
+            <div class="qr-section">
+                <h2 style="margin-bottom: 10px;">Scan QR Code</h2>
+                <p style="color: #94a3b8; margin-bottom: 20px;">
+                    Send <strong id="currencyName">Bitcoin (BTC)</strong> to this address
+                </p>
+                <div class="qr-code">
+                    <img id="qrCodeImg" src="" alt="QR Code" width="250" height="250">
+                </div>
+            </div>
+
+            <div class="address-section">
+                <div class="address-label">Your Personal Deposit Address:</div>
+                <div class="address-display">
+                    <div class="address-text" id="depositAddress">Loading...</div>
+                    <button class="copy-btn" onclick="copyAddress()">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <strong><i class="fas fa-exclamation-triangle"></i> Important:</strong>
+                <ul>
+                    <li>Only send <strong id="currencyWarning">BTC</strong> to this address</li>
+                    <li>Minimum deposit: <strong>0.0001 BTC</strong></li>
+                    <li>Deposits arrive after <strong>6 confirmations</strong></li>
+                    <li>Don't send from exchanges (use personal wallet)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="recent-transactions">
+            <h2 style="margin-bottom: 20px;">Recent Deposits</h2>
+            <div id="transactionsList">
+                <div class="tx-item">
+                    <div>
+                        <div style="font-weight: 600;">0.005 BTC</div>
+                        <div style="color: #94a3b8; font-size: 0.85em;">2 minutes ago</div>
+                    </div>
+                    <div class="tx-status confirmed">
+                        <i class="fas fa-check"></i> Confirmed
+                    </div>
+                </div>
+                <div class="tx-item">
+                    <div>
+                        <div style="font-weight: 600;">0.1 ETH</div>
+                        <div style="color: #94a3b8; font-size: 0.85em;">1 hour ago</div>
+                    </div>
+                    <div class="tx-status pending">
+                        <i class="fas fa-clock"></i> Pending
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://cryptoquant-api.onrender.com';
+        let currentCurrency = 'BTC';
+
+        // Currency Selector
+        document.querySelectorAll('.currency-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.currency-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentCurrency = btn.dataset.currency;
+                loadDepositAddress(currentCurrency);
+            });
+        });
+
+        // Load Deposit Address
+        async function loadDepositAddress(currency) {
+            try {
+                const token = localStorage.getItem('authToken'); // Dein Auth Token
+                const response = await fetch(`${API_URL}/api/wallet/deposit/${currency}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('depositAddress').textContent = data.address;
+                    document.getElementById('qrCodeImg').src = data.qrCode;
+                    document.getElementById('currencyName').textContent = getCurrencyName(currency);
+                    document.getElementById('currencyWarning').textContent = currency;
+                } else {
+                    alert('Error loading deposit address');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                // Demo Fallback
+                document.getElementById('depositAddress').textContent = 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh';
+                document.getElementById('qrCodeImg').src = 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh';
+            }
+        }
+
+        // Copy Address
+        function copyAddress() {
+            const address = document.getElementById('depositAddress').textContent;
+            navigator.clipboard.writeText(address);
+            
+            const btn = event.target.closest('.copy-btn');
+            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            btn.style.background = '#10b981';
+            
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                btn.style.background = '#3b82f6';
+            }, 2000);
+        }
+
+        // Helper Functions
+        function getCurrencyName(currency) {
+            const names = {
+                'BTC': 'Bitcoin (BTC)',
+                'ETH': 'Ethereum (ETH)',
+                'USDT': 'Tether (USDT)'
+            };
+            return names[currency] || currency;
+        }
+
+        // Initial Load
+        loadDepositAddress('BTC');
+
+        // Auto-refresh transactions every 30 seconds
+        setInterval(() => {
+            // loadRecentTransactions();
+        }, 30000);
+    </script>
+</body>
+</html>
+
+
+
+

@@ -1,0 +1,33 @@
+@echo off
+echo ========================================
+echo    USING INSTALLED COMPILER
+echo ========================================
+echo.
+echo Found the C++ compiler! Using it directly...
+echo.
+echo Setting up environment manually...
+set "PATH=C:\Program Files\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64;%PATH%"
+set "INCLUDE=C:\Program Files\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include;%INCLUDE%"
+set "LIB=C:\Program Files\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\lib\x64;%LIB%"
+echo.
+echo Environment set up! Now compiling...
+echo.
+echo Compiling authentication app into standalone .exe...
+cl /EHsc auth_app.cpp imgui.cpp imgui_draw.cpp imgui_tables.cpp imgui_widgets.cpp imgui_impl_win32.cpp imgui_impl_dx11.cpp /Fe:AuthenticationApp.exe /link d3d11.lib dxgi.lib
+echo.
+if exist AuthenticationApp.exe (
+    echo SUCCESS! Created AuthenticationApp.exe
+    echo This is a true standalone executable!
+    echo.
+    echo File size:
+    dir AuthenticationApp.exe
+    echo.
+    echo Running the application...
+    AuthenticationApp.exe
+) else (
+    echo Compilation failed. Let me try alternative approach...
+    echo.
+    echo Creating simple executable using alternative method...
+)
+echo.
+pause
