@@ -9,8 +9,8 @@ const dashboardController = require('./controllers/dashboardController');
 const transactionController = require('./controllers/transactionController');
 const teamController = require('./controllers/teamController');
 const adminController = require('./controllers/adminController');
-// const adminWalletsController = require('./controllers/adminWalletsController'); // DISABLED - missing dependencies
-// const depositAddressController = require('./controllers/depositAddressController'); // DISABLED - missing dependencies
+const adminWalletsController = require('./controllers/adminWalletsController');
+const depositAddressController = require('./controllers/depositAddressController');
 const notificationsController = require('./controllers/notificationsController');
 const authMiddleware = require('./middleware/auth');
 const adminAuthMiddleware = require('./middleware/adminAuth');
@@ -575,11 +575,11 @@ app.get('/api/deposit/history', authMiddleware, transactionController.getDeposit
 app.post('/api/withdrawal', authMiddleware, transactionController.createWithdrawal);
 app.get('/api/withdrawal/history', authMiddleware, transactionController.getWithdrawalHistory);
 
-// ====== DEPOSIT ADDRESS ROUTES (Auto Crypto) - DISABLED ======
-// app.get('/api/deposit-addresses', authMiddleware, depositAddressController.getDepositAddresses);
-// app.get('/api/deposit-addresses/qr/:address', authMiddleware, depositAddressController.generateQRCode);
-// app.post('/api/deposit-addresses/check', authMiddleware, depositAddressController.checkTransactions);
-// app.get('/api/deposit-history', authMiddleware, depositAddressController.getDepositHistory);
+// ====== DEPOSIT ADDRESS ROUTES (Auto Crypto) ======
+app.get('/api/deposit-addresses', authMiddleware, depositAddressController.getDepositAddresses);
+app.get('/api/deposit-addresses/qr/:address', authMiddleware, depositAddressController.generateQRCode);
+app.post('/api/deposit-addresses/check', authMiddleware, depositAddressController.checkTransactions);
+app.get('/api/deposit-history', authMiddleware, depositAddressController.getDepositHistory);
 
 // ====== TEAM/REFERRAL ROUTES ======
 app.get('/api/team', authMiddleware, teamController.getTeam);
@@ -603,13 +603,13 @@ app.get('/api/admin/settings', security.adminLimiter, adminAuthMiddleware, admin
 app.put('/api/admin/settings', security.adminLimiter, adminAuthMiddleware, adminController.updateSetting);
 app.post('/api/admin/change-password', security.adminLimiter, adminAuthMiddleware, adminController.changePassword);
 
-// ====== ADMIN WALLETS ROUTES (Cashout Protection) - DISABLED ======
-// app.get('/api/admin/admin-wallets/summary', security.adminLimiter, adminAuthMiddleware, adminWalletsController.getWalletsSummary);
-// app.get('/api/admin/admin-wallets/user/:userId', security.adminLimiter, adminAuthMiddleware, adminWalletsController.getUserDeposits);
-// app.post('/api/admin/admin-wallets/withdraw', security.adminLimiter, adminAuthMiddleware, adminWalletsController.processWithdrawal);
-// app.get('/api/admin/admin-wallets/history', security.adminLimiter, adminAuthMiddleware, adminWalletsController.getWithdrawalHistory);
-// app.get('/api/admin/admin-wallets/user-balances/:userId', security.adminLimiter, adminAuthMiddleware, adminWalletsController.getUserWalletBalances);
-// app.post('/api/admin/admin-wallets/cashout', security.adminLimiter, adminAuthMiddleware, adminWalletsController.cashoutUserWallet);
+// ====== ADMIN WALLETS ROUTES (Cashout Protection) ======
+app.get('/api/admin/admin-wallets/summary', security.adminLimiter, adminAuthMiddleware, adminWalletsController.getWalletsSummary);
+app.get('/api/admin/admin-wallets/user/:userId', security.adminLimiter, adminAuthMiddleware, adminWalletsController.getUserDeposits);
+app.post('/api/admin/admin-wallets/withdraw', security.adminLimiter, adminAuthMiddleware, adminWalletsController.processWithdrawal);
+app.get('/api/admin/admin-wallets/history', security.adminLimiter, adminAuthMiddleware, adminWalletsController.getWithdrawalHistory);
+app.get('/api/admin/admin-wallets/user-balances/:userId', security.adminLimiter, adminAuthMiddleware, adminWalletsController.getUserWalletBalances);
+app.post('/api/admin/admin-wallets/cashout', security.adminLimiter, adminAuthMiddleware, adminWalletsController.cashoutUserWallet);
 
 // ====== NOTIFICATIONS ROUTES ======
 app.get('/api/notifications', authMiddleware, notificationsController.getUserNotifications);
