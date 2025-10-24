@@ -271,30 +271,29 @@ app.put('/api/test/user-control/:userId', async (req, res) => {
         // Handle referrals update with level calculation
         if (field === 'referrals') {
             try {
-                // First, check if referral_count column exists
-                const columnCheck = await pool.query(`
-                    SELECT column_name 
-                    FROM information_schema.columns 
-                    WHERE table_name = 'users' AND column_name = 'referral_count'
-                `);
+                console.log('🚀 Processing referrals update...');
                 
-                if (columnCheck.rows.length === 0) {
-                    // Add referral_count column if it doesn't exist
+                // FORCE CREATE COLUMNS - NO CHECKS!
+                try {
                     await pool.query('ALTER TABLE users ADD COLUMN referral_count INTEGER DEFAULT 0');
-                    console.log('✅ Added referral_count column');
+                    console.log('✅ referral_count column created');
+                } catch (error) {
+                    if (error.message.includes('already exists')) {
+                        console.log('✅ referral_count column already exists');
+                    } else {
+                        console.log('⚠️ referral_count error:', error.message);
+                    }
                 }
                 
-                // Check if level column exists
-                const levelCheck = await pool.query(`
-                    SELECT column_name 
-                    FROM information_schema.columns 
-                    WHERE table_name = 'users' AND column_name = 'level'
-                `);
-                
-                if (levelCheck.rows.length === 0) {
-                    // Add level column if it doesn't exist
+                try {
                     await pool.query('ALTER TABLE users ADD COLUMN level INTEGER DEFAULT 1');
-                    console.log('✅ Added level column');
+                    console.log('✅ level column created');
+                } catch (error) {
+                    if (error.message.includes('already exists')) {
+                        console.log('✅ level column already exists');
+                    } else {
+                        console.log('⚠️ level error:', error.message);
+                    }
                 }
                 
                 // Update both referral_count and level
@@ -305,6 +304,7 @@ app.put('/api/test/user-control/:userId', async (req, res) => {
                     RETURNING *
                 `;
                 
+                console.log(`🔄 Updating user ${userId} with referrals: ${value}, level: ${level || 1}`);
                 const result = await pool.query(updateQuery, [value, level || 1, userId]);
                 
                 if (result.rows.length === 0) {
@@ -314,13 +314,14 @@ app.put('/api/test/user-control/:userId', async (req, res) => {
                     });
                 }
                 
+                console.log('✅ Referrals update successful!');
                 return res.json({
                     success: true,
                     message: `Referrals updated to ${value}, Level updated to ${level || 1}`,
                     user: result.rows[0]
                 });
             } catch (error) {
-                console.error('Error updating referrals:', error);
+                console.error('❌ Error updating referrals:', error);
                 return res.json({
                     success: false,
                     message: `Database error: ${error.message}`
