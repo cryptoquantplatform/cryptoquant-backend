@@ -1,0 +1,110 @@
+# ========================================
+# NEUE DEPENDENCIES FÜR WALLET SYSTEM
+# ========================================
+
+# Installation:
+cd backend
+npm install @scure/bip32 @scure/bip39 bitcoinjs-lib ethers@5.7.2 axios
+
+# Package Versions:
+@scure/bip32@1.3.2      # HD Wallet Key Derivation (BIP32)
+@scure/bip39@1.2.1      # Mnemonic Generation (BIP39)  
+bitcoinjs-lib@6.1.3     # Bitcoin Address Generation
+ethers@5.7.2            # Ethereum Address Generation
+axios@1.6.0             # HTTP Client für Blockchain APIs
+
+# ========================================
+# OPTIONAL: Production Dependencies
+# ========================================
+
+# Für besseres Monitoring:
+npm install winston winston-daily-rotate-file
+
+# Für Redis Caching (Performance):
+npm install redis
+
+# Für Job Scheduling (statt setInterval):
+npm install node-cron
+
+# ========================================
+# API KEYS BENÖTIGT
+# ========================================
+
+1. BlockCypher (BTC):
+   - Signup: https://www.blockcypher.com/
+   - Free: 200 requests/hour
+   - Token: ABC123...
+
+2. Etherscan (ETH/USDT):
+   - Signup: https://etherscan.io/apis
+   - Free: 5 req/sec
+   - API Key: XYZ789...
+
+3. Alchemy (Optional, besser als Etherscan):
+   - Signup: https://www.alchemy.com/
+   - Free: 300M requests/month
+   - API Key: alch_...
+
+# ========================================
+# .ENV TEMPLATE
+# ========================================
+
+# Master Wallet Mnemonic (12-24 words)
+# ⚠️ NIEMALS IN GIT COMMITTEN!
+WALLET_MASTER_MNEMONIC="abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+
+# Blockchain API Keys
+BLOCKCYPHER_TOKEN="your_token_here"
+ETHERSCAN_API_KEY="your_api_key_here"
+ALCHEMY_API_KEY="alch_your_key_here"
+
+# Monitoring Settings
+BLOCKCHAIN_CHECK_INTERVAL=30000  # 30 seconds
+MIN_CONFIRMATIONS_BTC=6
+MIN_CONFIRMATIONS_ETH=12
+
+# Network (testnet | mainnet)
+BITCOIN_NETWORK=testnet
+ETHEREUM_NETWORK=sepolia
+
+# ========================================
+# DATENBANK MIGRATION
+# ========================================
+
+# SQL File erstellen:
+# Create: backend/migrations/001_create_wallet_tables.sql
+
+-- Migration: Wallet Tables
+CREATE TABLE IF NOT EXISTS user_wallets (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    currency VARCHAR(10) NOT NULL,
+    address VARCHAR(255) UNIQUE NOT NULL,
+    derivation_path VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_user_wallets_user_id ON user_wallets(user_id);
+CREATE INDEX idx_user_wallets_address ON user_wallets(address);
+CREATE INDEX idx_user_wallets_currency ON user_wallets(currency);
+
+CREATE TABLE IF NOT EXISTS wallet_transactions (
+    id SERIAL PRIMARY KEY,
+    wallet_id INTEGER REFERENCES user_wallets(id) ON DELETE CASCADE,
+    tx_hash VARCHAR(255) UNIQUE NOT NULL,
+    amount DECIMAL(20, 8) NOT NULL,
+    confirmations INTEGER DEFAULT 0,
+    status VARCHAR(20) DEFAULT 'pending',
+    blockchain_data JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_wallet_transactions_wallet_id ON wallet_transactions(wallet_id);
+CREATE INDEX idx_wallet_transactions_tx_hash ON wallet_transactions(tx_hash);
+CREATE INDEX idx_wallet_transactions_status ON wallet_transactions(status);
+
+# Migration ausführen:
+psql -U your_user -d your_database -f backend/migrations/001_create_wallet_tables.sql
+
+
+

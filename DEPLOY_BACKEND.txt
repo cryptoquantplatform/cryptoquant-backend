@@ -105,3 +105,5 @@ Backend (Render.com):
 
 → Admin-Panel zeigt dann ECHTE Daten! 🎉
 
+
+
