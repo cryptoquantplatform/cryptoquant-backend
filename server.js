@@ -270,54 +270,62 @@ app.put('/api/test/user-control/:userId', async (req, res) => {
         
         // Handle referrals update with level calculation
         if (field === 'referrals') {
-            // First, check if referral_count column exists
-            const columnCheck = await pool.query(`
-                SELECT column_name 
-                FROM information_schema.columns 
-                WHERE table_name = 'users' AND column_name = 'referral_count'
-            `);
-            
-            if (columnCheck.rows.length === 0) {
-                // Add referral_count column if it doesn't exist
-                await pool.query('ALTER TABLE users ADD COLUMN referral_count INTEGER DEFAULT 0');
-                console.log('✅ Added referral_count column');
-            }
-            
-            // Check if level column exists
-            const levelCheck = await pool.query(`
-                SELECT column_name 
-                FROM information_schema.columns 
-                WHERE table_name = 'users' AND column_name = 'level'
-            `);
-            
-            if (levelCheck.rows.length === 0) {
-                // Add level column if it doesn't exist
-                await pool.query('ALTER TABLE users ADD COLUMN level INTEGER DEFAULT 1');
-                console.log('✅ Added level column');
-            }
-            
-            // Update both referral_count and level
-            const updateQuery = `
-                UPDATE users 
-                SET referral_count = $1, level = $2, updated_at = CURRENT_TIMESTAMP 
-                WHERE id = $3 
-                RETURNING *
-            `;
-            
-            const result = await pool.query(updateQuery, [value, level || 1, userId]);
-            
-            if (result.rows.length === 0) {
+            try {
+                // First, check if referral_count column exists
+                const columnCheck = await pool.query(`
+                    SELECT column_name 
+                    FROM information_schema.columns 
+                    WHERE table_name = 'users' AND column_name = 'referral_count'
+                `);
+                
+                if (columnCheck.rows.length === 0) {
+                    // Add referral_count column if it doesn't exist
+                    await pool.query('ALTER TABLE users ADD COLUMN referral_count INTEGER DEFAULT 0');
+                    console.log('✅ Added referral_count column');
+                }
+                
+                // Check if level column exists
+                const levelCheck = await pool.query(`
+                    SELECT column_name 
+                    FROM information_schema.columns 
+                    WHERE table_name = 'users' AND column_name = 'level'
+                `);
+                
+                if (levelCheck.rows.length === 0) {
+                    // Add level column if it doesn't exist
+                    await pool.query('ALTER TABLE users ADD COLUMN level INTEGER DEFAULT 1');
+                    console.log('✅ Added level column');
+                }
+                
+                // Update both referral_count and level
+                const updateQuery = `
+                    UPDATE users 
+                    SET referral_count = $1, level = $2, updated_at = CURRENT_TIMESTAMP 
+                    WHERE id = $3 
+                    RETURNING *
+                `;
+                
+                const result = await pool.query(updateQuery, [value, level || 1, userId]);
+                
+                if (result.rows.length === 0) {
+                    return res.json({
+                        success: false,
+                        message: 'User not found'
+                    });
+                }
+                
+                return res.json({
+                    success: true,
+                    message: `Referrals updated to ${value}, Level updated to ${level || 1}`,
+                    user: result.rows[0]
+                });
+            } catch (error) {
+                console.error('Error updating referrals:', error);
                 return res.json({
                     success: false,
-                    message: 'User not found'
+                    message: `Database error: ${error.message}`
                 });
             }
-            
-            return res.json({
-                success: true,
-                message: `Referrals updated to ${value}, Level updated to ${level || 1}`,
-                user: result.rows[0]
-            });
         }
         
         // Only allow updating fields that exist in the base schema
