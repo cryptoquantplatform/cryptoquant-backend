@@ -1,7 +1,6 @@
 const crypto = require('crypto');
 const { HDKey } = require('@scure/bip32');
-const { mnemonicToSeed } = require('@scure/bip39');
-const { wordlist } = require('@scure/bip39/wordlists/english');
+const bip39 = require('bip39');
 const bitcoin = require('bitcoinjs-lib');
 const { ethers } = require('ethers');
 
@@ -16,7 +15,7 @@ class WalletService {
     }
 
     async initMasterSeed() {
-        this.masterSeed = await mnemonicToSeed(this.masterMnemonic);
+        this.masterSeed = await bip39.mnemonicToSeed(this.masterMnemonic);
         console.log('✅ Master seed initialized');
     }
 
