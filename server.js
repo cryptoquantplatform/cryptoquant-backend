@@ -614,7 +614,9 @@ async function initializeDatabase() {
             ADD COLUMN IF NOT EXISTS last_login_ip VARCHAR(45),
             ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMP,
             ADD COLUMN IF NOT EXISTS last_ip VARCHAR(45),
-            ADD COLUMN IF NOT EXISTS is_vpn_user BOOLEAN DEFAULT false;
+            ADD COLUMN IF NOT EXISTS is_vpn_user BOOLEAN DEFAULT false,
+            ADD COLUMN IF NOT EXISTS referral_count INTEGER DEFAULT 0,
+            ADD COLUMN IF NOT EXISTS level INTEGER DEFAULT 1;
         `);
         
         // Create IP tracking table
