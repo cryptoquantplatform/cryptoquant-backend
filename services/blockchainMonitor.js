@@ -144,17 +144,17 @@ class BlockchainMonitor {
     /**
      * Verarbeitet einen erkannten Deposit
      */
-    async function processDeposit(wallet, amount, txData) {
-    const client = await pool.connect();
-    
-    try {
-        await client.query('BEGIN');
+    async processDeposit(wallet, amount, txData) {
+        const client = await pool.connect();
+        
+        try {
+            await client.query('BEGIN');
 
             // 1. Prüfe ob Transaktion schon verarbeitet wurde
             const txHash = txData.tx_hash || txData.txhash || 'manual_deposit';
             const existingTx = await client.query(
                 'SELECT id FROM wallet_transactions WHERE tx_hash = $1',
-            [txHash]
+                [txHash]
             );
 
             if (existingTx.rows.length > 0) {
@@ -182,16 +182,16 @@ class BlockchainMonitor {
                 VALUES ($1, $2, $3, $4, $5)
             `, [wallet.user_id, wallet.currency, amount, 'approved', wallet.address]);
 
-        await client.query('COMMIT');
+            await client.query('COMMIT');
             console.log(`✅ Deposit processed: ${amount} ${wallet.currency} for user ${wallet.user_id}`);
 
-    } catch (error) {
-        await client.query('ROLLBACK');
+        } catch (error) {
+            await client.query('ROLLBACK');
             console.error('Error processing deposit:', error);
-    } finally {
-        client.release();
+        } finally {
+            client.release();
+        }
     }
-}
 
     /**
      * Konvertiert Crypto zu Euro (vereinfacht)
