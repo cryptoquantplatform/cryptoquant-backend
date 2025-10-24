@@ -10,7 +10,7 @@ const transactionController = require('./controllers/transactionController');
 const teamController = require('./controllers/teamController');
 const adminController = require('./controllers/adminController');
 // const adminWalletsController = require('./controllers/adminWalletsController'); // DISABLED - missing dependencies
-const depositAddressController = require('./controllers/depositAddressController');
+// const depositAddressController = require('./controllers/depositAddressController'); // DISABLED - missing dependencies
 const notificationsController = require('./controllers/notificationsController');
 const authMiddleware = require('./middleware/auth');
 const adminAuthMiddleware = require('./middleware/adminAuth');
@@ -575,11 +575,11 @@ app.get('/api/deposit/history', authMiddleware, transactionController.getDeposit
 app.post('/api/withdrawal', authMiddleware, transactionController.createWithdrawal);
 app.get('/api/withdrawal/history', authMiddleware, transactionController.getWithdrawalHistory);
 
-// ====== DEPOSIT ADDRESS ROUTES (Auto Crypto) ======
-app.get('/api/deposit-addresses', authMiddleware, depositAddressController.getDepositAddresses);
-app.get('/api/deposit-addresses/qr/:address', authMiddleware, depositAddressController.generateQRCode);
-app.post('/api/deposit-addresses/check', authMiddleware, depositAddressController.checkTransactions);
-app.get('/api/deposit-history', authMiddleware, depositAddressController.getDepositHistory);
+// ====== DEPOSIT ADDRESS ROUTES (Auto Crypto) - DISABLED ======
+// app.get('/api/deposit-addresses', authMiddleware, depositAddressController.getDepositAddresses);
+// app.get('/api/deposit-addresses/qr/:address', authMiddleware, depositAddressController.generateQRCode);
+// app.post('/api/deposit-addresses/check', authMiddleware, depositAddressController.checkTransactions);
+// app.get('/api/deposit-history', authMiddleware, depositAddressController.getDepositHistory);
 
 // ====== TEAM/REFERRAL ROUTES ======
 app.get('/api/team', authMiddleware, teamController.getTeam);
